@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 class QueueChecker extends BaseChecker
 {
     protected bool $hasFailedJobs = false;
+    protected bool $isBackedUp = false;
 
     public function getName(): string
     {
@@ -27,13 +28,22 @@ class QueueChecker extends BaseChecker
 
     public function getFixActionName(): ?string
     {
-        return $this->hasFailedJobs ? $this->tr('queue_fix') : null;
+        if ($this->hasFailedJobs) {
+            return $this->tr('queue_fix');
+        }
+        if ($this->isBackedUp) {
+            return $this->tr('queue_process');
+        }
+        return null;
     }
 
     public function performFix(): void
     {
         if ($this->hasFailedJobs) {
             Artisan::call('queue:retry', ['all' => true]);
+        } elseif ($this->isBackedUp) {
+            // Processing jobs might take time, but we stop when empty
+            Artisan::call('queue:work', ['--stop-when-empty' => true]);
         }
     }
 
@@ -63,6 +73,7 @@ class QueueChecker extends BaseChecker
             }
 
             if ($pendingJobsCount > 50) {
+                $this->isBackedUp = true;
                 return [
                     'success' => false,
                     'message' => $this->tr('queue_backed_up', ['count' => $pendingJobsCount]),

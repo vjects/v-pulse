@@ -86,6 +86,12 @@ abstract class BaseChecker implements CheckerInterface
                 'queue_failed' => 'Danger: :count jobs have failed and require attention!',
                 'queue_backed_up' => 'Warning: Queue is heavily backed up (:count pending jobs). Ensure Queue Worker is running!',
                 'queue_fix' => 'Retry Failed Jobs',
+                'queue_process' => 'Process Pending Jobs',
+                
+                'mail_name' => 'SMTP Mail Connection',
+                'mail_desc' => 'Checks if the application can establish a socket connection with the SMTP server.',
+                'mail_ok' => 'Successfully connected to the SMTP server.',
+                'mail_fail' => 'SMTP Connection Failed: :error',
             ],
             'fa' => [
                 'db_name' => 'سلامت دیتابیس مرکزی',
@@ -123,6 +129,12 @@ abstract class BaseChecker implements CheckerInterface
                 'queue_failed' => 'اخطار جدی: :count جاب شکست خورده یافت شد!',
                 'queue_backed_up' => 'هشدار: صف بسیار شلوغ است (:count جاب در انتظار). مطمئن شوید Worker فعال است!',
                 'queue_fix' => 'تلاش مجدد جاب‌های شکست خورده',
+                'queue_process' => 'پردازش دستی جاب‌های صف',
+
+                'mail_name' => 'اتصال سرور ایمیل (SMTP)',
+                'mail_desc' => 'بررسی اتصال سوکت به سرور ارسال ایمیل (SMTP) برای اطمینان از سلامت سرویس ایمیل.',
+                'mail_ok' => 'ارتباط با سرور ایمیل با موفقیت برقرار شد.',
+                'mail_fail' => 'خطا در ارتباط با سرور ایمیل: :error',
             ]
         ];
 

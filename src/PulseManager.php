@@ -117,6 +117,7 @@ class PulseManager
         $defaultCheckers = [
             Checkers\DatabaseChecker::class,
             Checkers\QueueChecker::class,
+            Checkers\MailChecker::class,
             Checkers\ApiConnectionChecker::class,
             Checkers\SecurityChecker::class,
             Checkers\TelegramConnectionChecker::class,

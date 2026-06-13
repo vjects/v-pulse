@@ -108,6 +108,31 @@
                             Last checked: {{ $this->lastChecked }}
                         </div>
                     @endif
+
+                    <x-filament::section>
+                        <h3 class="font-bold mb-4 flex items-center gap-2">
+                            <x-filament::icon icon="heroicon-o-squares-2x2" class="h-5 w-5 text-primary-500" />
+                            {{ $isFa ? 'خلاصه وضعیت سیستم' : 'System Overview' }}
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            @foreach($results as $result)
+                                <div class="flex items-center gap-3 p-3 rounded-lg border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 shadow-sm transition-all hover:shadow-md">
+                                    @if($result['status'] === 'success')
+                                        <span class="relative flex h-3 w-3">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-success-500"></span>
+                                        </span>
+                                    @else
+                                        <span class="relative flex h-3 w-3">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-danger-500"></span>
+                                        </span>
+                                    @endif
+                                    <span class="text-sm font-medium truncate">{{ $result['name'] }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </x-filament::section>
                     
                     @foreach($results as $result)
                         <x-filament::section>
