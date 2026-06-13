@@ -17,7 +17,14 @@ class VPulseWidget extends Widget
     public function loadDiagnostics()
     {
         $manager = app('vjects-pulse');
-        $this->results = $manager->runAllCheckers();
+        
+        // Register default checkers
+        $manager->registerChecker(\Vjects\Pulse\Checkers\DatabaseChecker::class);
+        $manager->registerChecker(\Vjects\Pulse\Checkers\ApiConnectionChecker::class);
+        $manager->registerChecker(\Vjects\Pulse\Checkers\TelegramConnectionChecker::class);
+        $manager->registerChecker(\Vjects\Pulse\Checkers\SecurityChecker::class);
+        
+        $this->results = $manager->runChecks();
         $this->isLoading = false;
     }
 }

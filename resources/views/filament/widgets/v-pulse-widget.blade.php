@@ -22,9 +22,9 @@
                         <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col gap-2">
                             <div class="flex justify-between items-center">
                                 <span class="font-medium text-sm text-gray-700 dark:text-gray-300">
-                                    {{ \Illuminate\Support\Str::headline($key) }}
+                                    {{ $result['name'] ?? \Illuminate\Support\Str::headline($key) }}
                                 </span>
-                                @if(isset($result['status']) && $result['status'] === 'ok')
+                                @if(isset($result['status']) && $result['status'] === 'success')
                                     <span class="w-3 h-3 rounded-full bg-success-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span>
                                 @else
                                     <span class="w-3 h-3 rounded-full bg-danger-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>
