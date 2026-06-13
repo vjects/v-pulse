@@ -62,7 +62,7 @@ abstract class BaseChecker implements CheckerInterface
                 'api_ok' => 'API Ecosystem is reachable.',
                 'api_fail' => 'Network request failed: :error',
                 'api_no_url' => 'API Ecosystem URL is not configured in settings.',
-                'api_local_note' => ' (Note: In Local environment, API servers might be offline. This is safe to ignore.)',
+                'api_local_note' => ' (Note: In Local environment using "php artisan serve", cURL timeouts (Error 28) are expected because the built-in server is single-threaded and cannot ping itself. This is safe to ignore.)',
                 'api_fix' => 'Run Diagnose Tool',
                 
                 'sec_name' => 'Application Security Baseline',
@@ -90,7 +90,7 @@ abstract class BaseChecker implements CheckerInterface
                 'api_ok' => 'اکوسیستم API در دسترس است.',
                 'api_fail' => 'خطای شبکه در اتصال: :error',
                 'api_no_url' => 'آدرس سرور API در تنظیمات وارد نشده است.',
-                'api_local_note' => ' (توجه: در محیط لوکال، خاموش بودن سرورهای API طبیعی است و نادیده گرفته می‌شود.)',
+                'api_local_note' => ' (توجه: در محیط لوکال با php artisan serve، خطای تایم‌اوت cURL (Error 28) به دلیل سینگل‌تِرِد بودن سرور داخلی کاملاً طبیعی است و نادیده گرفته شد.)',
                 'api_fix' => 'اجرای ابزار عیب‌یابی',
                 
                 'sec_name' => 'پایه امنیتی اپلیکیشن',
