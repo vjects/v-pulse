@@ -7,7 +7,7 @@ use Vjects\Pulse\PulseManager;
 
 class VPulseWidget extends Widget
 {
-    protected static string $view = 'vpulse::filament.widgets.v-pulse-widget';
+    protected static string $view = 'v-pulse::filament.widgets.v-pulse-widget';
     protected int | string | array $columnSpan = 'full';
     protected static ?int $sort = -1;
 
