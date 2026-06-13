@@ -150,6 +150,16 @@ class PulseManager
         $logPath = storage_path('logs/vpulse.log');
         $date = date('Y-m-d H:i:s');
         $line = "[$date] $message\n";
+        
+        if (!file_exists(dirname($logPath))) {
+            mkdir(dirname($logPath), 0755, true);
+        }
+        
+        // Clear log if it exceeds 1MB to prevent memory exhaustion
+        if (file_exists($logPath) && filesize($logPath) > 1048576) {
+            file_put_contents($logPath, "[$date] --- Log rotated due to size limit (1MB) ---\n");
+        }
+        
         file_put_contents($logPath, $line, FILE_APPEND);
     }
 }

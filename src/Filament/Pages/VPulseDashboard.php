@@ -16,6 +16,7 @@ class VPulseDashboard extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-cpu-chip';
+    protected static ?string $navigationGroup = 'V-Pulse System';
     protected static ?string $navigationLabel = 'V-Pulse Diagnostics';
     protected static ?string $title = 'V-Pulse System Diagnostics';
     protected static ?string $slug = 'v-pulse';
@@ -25,6 +26,7 @@ class VPulseDashboard extends Page implements HasForms
     public ?array $data = [];
     public ?string $aiResponse = null;
     public ?string $aiAnalysisTitle = null;
+    public ?string $lastChecked = null;
 
     public function mount(): void
     {
@@ -64,6 +66,17 @@ class VPulseDashboard extends Page implements HasForms
                                     ->default('production')
                                     ->required()
                                     ->live(),
+                                    
+                                Select::make('cache_interval')
+                                    ->label($isFa ? 'زمان‌بندی بررسی سیستم (Cache)' : 'System Check Interval (Cache)')
+                                    ->options([
+                                        '0' => $isFa ? 'درلحظه (بدون کش)' : 'Real-time (No Cache)',
+                                        '15' => $isFa ? 'هر ۱۵ دقیقه' : 'Every 15 Minutes',
+                                        '60' => $isFa ? 'هر ۱ ساعت' : 'Every 1 Hour',
+                                        '720' => $isFa ? 'هر ۱۲ ساعت' : 'Every 12 Hours',
+                                    ])
+                                    ->default('0')
+                                    ->required(),
                                     
                                 Select::make('mode')
                                     ->label($isFa ? 'معماری سیستم' : 'Architecture Mode')
@@ -173,14 +186,20 @@ class VPulseDashboard extends Page implements HasForms
     {
         return [
             Action::make('testTelegram')
-                ->label('تست ارسال به تلگرام')
+                ->label($isFa ? 'تست ارسال به تلگرام' : 'Test Telegram')
                 ->icon('heroicon-o-paper-airplane')
                 ->color('info')
                 ->action('sendTelegramTest')
                 ->visible(fn () => in_array('telegram', $this->data['modules'] ?? []) && !empty($this->data['telegram_bot_token'])),
                 
+            Action::make('forceRescan')
+                ->label($isFa ? 'بررسی مجدد' : 'Rescan System')
+                ->icon('heroicon-o-arrow-path')
+                ->color('success')
+                ->action('performRescan'),
+                
             Action::make('save')
-                ->label('Save Settings')
+                ->label($isFa ? 'ذخیره تنظیمات' : 'Save Settings')
                 ->action('saveSettings')
                 ->color('primary'),
         ];
@@ -252,16 +271,46 @@ class VPulseDashboard extends Page implements HasForms
         }
     }
 
+    public function performRescan(): void
+    {
+        \Illuminate\Support\Facades\Cache::forget('vpulse_check_results_data');
+        
+        /** @var PulseManager $manager */
+        $manager = app('vjects-pulse');
+        $isFa = ($manager->getSettings()['system_language'] ?? 'fa') === 'fa';
+        
+        \Filament\Notifications\Notification::make()
+            ->title($isFa ? 'بررسی مجدد انجام شد' : 'Rescan Completed')
+            ->success()
+            ->send();
+            
+        $this->redirect(request()->header('Referer'));
+    }
+
     public function getCheckResults(): array
     {
         /** @var PulseManager $manager */
         $manager = app('vjects-pulse');
+        $settings = $manager->getSettings();
+        $cacheMinutes = (int) ($settings['cache_interval'] ?? 0);
         
         $manager->registerChecker(\Vjects\Pulse\Checkers\DatabaseChecker::class);
         $manager->registerChecker(\Vjects\Pulse\Checkers\ApiConnectionChecker::class);
         $manager->registerChecker(\Vjects\Pulse\Checkers\TelegramConnectionChecker::class);
         $manager->registerChecker(\Vjects\Pulse\Checkers\SecurityChecker::class);
         
+        if ($cacheMinutes > 0) {
+            $data = \Illuminate\Support\Facades\Cache::remember('vpulse_check_results_data', now()->addMinutes($cacheMinutes), function () use ($manager) {
+                return [
+                    'time' => now()->toDateTimeString(),
+                    'results' => $manager->runChecks(),
+                ];
+            });
+            $this->lastChecked = $data['time'];
+            return $data['results'];
+        }
+        
+        $this->lastChecked = now()->toDateTimeString();
         return $manager->runChecks();
     }
     
@@ -274,8 +323,14 @@ class VPulseDashboard extends Page implements HasForms
             return $isFa ? 'هیچ خطایی ثبت نشده است.' : 'No errors logged yet.';
         }
         
-        $lines = array_slice(file($logPath), -100);
-        return implode('', array_reverse($lines));
+        $content = file_get_contents($logPath);
+        if (empty(trim($content))) {
+            return $isFa ? 'هیچ خطایی ثبت نشده است.' : 'No errors logged yet.';
+        }
+        
+        $lines = explode("\n", trim($content));
+        $lines = array_slice($lines, -100);
+        return implode("\n", array_reverse($lines));
     }
     
     public function clearLogs(): void

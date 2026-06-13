@@ -67,6 +67,13 @@
                         $results = $this->getCheckResults();
                     @endphp
                     
+                    @if($this->lastChecked)
+                        <div class="text-xs text-gray-500 font-mono flex items-center justify-end gap-1 opacity-75" dir="ltr">
+                            <x-filament::icon icon="heroicon-o-clock" class="h-3 w-3" />
+                            Last checked: {{ $this->lastChecked }}
+                        </div>
+                    @endif
+                    
                     @foreach($results as $result)
                         <x-filament::section>
                             <div class="flex items-center justify-between">
