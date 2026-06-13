@@ -22,15 +22,9 @@
         </div>
 
         <!-- Diagnostics Panel -->
-        <div class="lg:col-span-2 space-y-6" x-data="{ activeTab: '{{ $this->isConfigured() ? 'checks' : 'settings' }}' }">
+        <div class="lg:col-span-2 space-y-6" x-data="{ activeTab: 'checks' }">
             <x-filament::tabs class="mb-6">
-                <x-filament::tabs.item
-                    x-on:click="activeTab = 'settings'"
-                    x-bind:class="{ 'bg-white text-primary-600 shadow-sm dark:bg-gray-800 dark:text-primary-400': activeTab === 'settings' }"
-                    class="font-medium px-4 py-2"
-                >
-                    {{ $isFa ? 'تنظیمات (Scope)' : 'Scope Settings' }}
-                </x-filament::tabs.item>
+                <!-- Settings tab removed because it's always on the left column -->
                 
                 @if($this->isConfigured())
                     <x-filament::tabs.item
@@ -70,30 +64,23 @@
                 @endif
             </x-filament::tabs>
 
-            <div class="mt-6">
-                <!-- Settings Tab -->
-                <div x-show="activeTab === 'settings'">
-                    
-                    @if(!$this->isConfigured())
-                        <div class="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg relative overflow-hidden">
-                            <div class="absolute right-0 top-0 opacity-10">
-                                <x-filament::icon icon="heroicon-o-sparkles" class="w-32 h-32 transform translate-x-8 -translate-y-8" />
-                            </div>
-                            <div class="relative z-10">
-                                <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
-                                    <x-filament::icon icon="heroicon-o-rocket-launch" class="w-6 h-6" />
-                                    {{ $isFa ? 'به سیستم تشخیص هوشمند V-Pulse خوش آمدید!' : 'Welcome to V-Pulse Smart Diagnostics!' }}
-                                </h2>
-                                <p class="opacity-90 max-w-2xl text-sm leading-relaxed">
-                                    {{ $isFa ? 'برای راه‌اندازی و فعال‌سازی این سیستم، ابتدا باید تنظیمات پایه (مثل زبان سیستم، معماری محیط اجرا و ماژول‌ها) را از فرم زیر پیکربندی کرده و دکمه "ذخیره تنظیمات" در بالا را کلیک کنید تا سایر بخش‌ها فعال شوند.' : 'To initialize the system, please configure the basic settings below (e.g., system language, architecture mode) and click "Save Settings" at the top to unlock the diagnostic modules.' }}
-                                </p>
-                            </div>
+                <!-- Welcome Banner for new setups -->
+                @if(!$this->isConfigured())
+                    <div class="mb-6 p-6 rounded-xl bg-gradient-to-l from-blue-600 to-indigo-700 text-white shadow-xl relative overflow-hidden">
+                        <div class="absolute left-0 top-0 bottom-0 flex items-center justify-center opacity-10 pointer-events-none">
+                            <x-filament::icon icon="heroicon-o-sparkles" class="w-48 h-48 transform -translate-x-8" />
                         </div>
-                    @endif
-                    <form wire:submit="saveSettings">
-                        {{ $this->form }}
-                    </form>
-                </div>
+                        <div class="relative z-10">
+                            <h2 class="text-2xl font-bold mb-3 flex items-center gap-2">
+                                <x-filament::icon icon="heroicon-o-rocket-launch" class="w-8 h-8" />
+                                {{ $isFa ? 'به سیستم تشخیص هوشمند V-Pulse خوش آمدید!' : 'Welcome to V-Pulse Smart Diagnostics!' }}
+                            </h2>
+                            <p class="opacity-90 max-w-2xl text-base leading-relaxed">
+                                {{ $isFa ? 'برای راه‌اندازی و فعال‌سازی این سیستم، لطفاً از پنل تنظیمات در سمت راست، گزینه‌های پایه (مثل محیط اجرا و معماری) را پیکربندی کرده و دکمه "ذخیره تنظیمات" را از بالای صفحه کلیک کنید.' : 'To initialize the system, please configure the basic settings in the panel and click "Save Settings" at the top.' }}
+                            </p>
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Checks Tab -->
                 <div x-show="activeTab === 'checks'" class="space-y-6">
