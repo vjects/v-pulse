@@ -2,6 +2,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         @php
             $isFa = ($this->data['system_language'] ?? 'fa') === 'fa';
+            $pulseManager = app('vjects-pulse');
+            $histories = $pulseManager->getAiHistory();
         @endphp
         <!-- Settings Panel -->
         <div class="lg:col-span-1 space-y-6">
@@ -54,9 +56,6 @@
                             {{ $isFa ? 'تاریخچه هوش مصنوعی' : 'AI History' }}
                             
                             @php
-                                /** @var \Vjects\Pulse\PulseManager $manager */
-                                $manager = app('vjects-pulse');
-                                $histories = $manager->getAiHistory();
                                 $hasUnread = collect($histories)->where('is_read', false)->count() > 0;
                             @endphp
                             
