@@ -39,6 +39,27 @@ class PulseManager
         file_put_contents($path, json_encode($settings, JSON_PRETTY_PRINT));
     }
 
+    public function getAiHistory(): array
+    {
+        $path = storage_path('app/vpulse_ai.json');
+        return file_exists($path) ? json_decode(file_get_contents($path), true) ?? [] : [];
+    }
+
+    public function saveAiAnalysis(array $data): void
+    {
+        $dir = storage_path('app');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $path = $dir . '/vpulse_ai.json';
+        $history = $this->getAiHistory();
+        array_unshift($history, $data); // Add to top
+        $history = array_slice($history, 0, 15); // Keep last 15 analyses
+        
+        file_put_contents($path, json_encode($history, JSON_PRETTY_PRINT));
+    }
+
     /**
      * Register a new Checker.
      */

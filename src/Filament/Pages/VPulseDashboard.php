@@ -339,8 +339,13 @@ class VPulseDashboard extends Page implements HasForms
             /** @var \Vjects\Pulse\Checkers\CheckerInterface $checker */
             $checker = app($checkerClass);
             $checkerName = $checker->getName();
+            
+            $sysLang = $lang === 'fa' ? 'Persian (فارسی)' : 'English';
+            $envType = $settings['system_environment'] ?? 'production';
                 
-            $prompt = "You are an expert DevOps engineer and software architect. Analyze this failing system component:\nComponent: {$checkerName}\nDescription: {$checker->getDescription()}\nPlease provide a short, highly technical, and actionable step-by-step fix in " . ($lang === 'fa' ? 'Persian' : 'English') . ". Format the output with clear Markdown structure, avoiding fluff.";
+            $systemPrompt = "You are an elite DevOps Engineer and Software Architect. Your task is to diagnose and resolve system failures. You MUST respond entirely and fluently in {$sysLang}. Format the output with clear, well-organized Markdown structure. Avoid fluff and pleasantries; provide direct, highly technical, and actionable step-by-step resolution plans.";
+            
+            $userPrompt = "The following component has failed in our Laravel application.\n\nComponent Name: {$checkerName}\nDescription: {$checker->getDescription()}\nEnvironment: {$envType}\n\nPlease analyze this failure and provide the exact steps to fix it.";
             
             $url = '';
             $payload = [];
@@ -350,7 +355,8 @@ class VPulseDashboard extends Page implements HasForms
                 $payload = [
                     'model' => $model ?: 'qwen-turbo',
                     'messages' => [
-                        ['role' => 'user', 'content' => $prompt]
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $userPrompt]
                     ]
                 ];
             } else if ($provider === 'openai') {
@@ -358,21 +364,23 @@ class VPulseDashboard extends Page implements HasForms
                 $payload = [
                     'model' => $model ?: 'gpt-4o',
                     'messages' => [
-                        ['role' => 'user', 'content' => $prompt]
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $userPrompt]
                     ]
                 ];
             } else if ($provider === 'google') {
                 $url = "https://generativelanguage.googleapis.com/v1beta/models/" . ($model ?: 'gemini-1.5-pro') . ":generateContent?key=" . $apiKey;
                 $payload = [
+                    'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
                     'contents' => [
-                        ['parts' => [['text' => $prompt]]]
+                        ['parts' => [['text' => $userPrompt]]]
                     ]
                 ];
             } else {
                 throw new \Exception("پروایدر هوش مصنوعی پشتیبانی نمی‌شود.");
             }
             
-            $request = \Illuminate\Support\Facades\Http::timeout(30);
+            $request = \Illuminate\Support\Facades\Http::timeout(45);
             
             if ($provider !== 'google') {
                 $request = $request->withToken($apiKey);
@@ -388,6 +396,14 @@ class VPulseDashboard extends Page implements HasForms
                 }
                 
                 $this->aiAnalysisTitle = "تحلیل هوشمند: {$checkerName}";
+                
+                // Save to history
+                $manager->saveAiAnalysis([
+                    'checker' => $checkerName,
+                    'date' => date('Y-m-d H:i:s'),
+                    'response' => $this->aiResponse,
+                ]);
+                
                 $this->dispatch('open-modal', id: 'ai-analysis-modal');
             } else {
                 throw new \Exception($response->body());

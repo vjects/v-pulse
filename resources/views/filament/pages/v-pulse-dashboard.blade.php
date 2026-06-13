@@ -35,6 +35,13 @@
                 >
                     {{ $isFa ? 'لاگ سیستم' : 'System Logs' }}
                 </x-filament::tabs.item>
+                
+                <x-filament::tabs.item 
+                    alpine-active="activeTab === 'ai_history'" 
+                    x-on:click="activeTab = 'ai_history'"
+                >
+                    {{ $isFa ? 'تاریخچه تحلیل‌های هوش مصنوعی' : 'AI Analysis History' }}
+                </x-filament::tabs.item>
             </x-filament::tabs>
 
             <div class="mt-6">
@@ -107,6 +114,36 @@
                         </div>
                         <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm" dir="ltr" style="max-height: 400px; overflow-y: auto;">{{ $this->getLogs() }}</pre>
                     </x-filament::section>
+                </div>
+                
+                <!-- AI History Tab -->
+                <div x-show="activeTab === 'ai_history'" x-cloak class="space-y-6">
+                    @php
+                        /** @var \Vjects\Pulse\PulseManager $manager */
+                        $manager = app('vjects-pulse');
+                        $histories = $manager->getAiHistory();
+                    @endphp
+                    
+                    @forelse($histories as $history)
+                        <x-filament::section>
+                            <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center gap-2 text-primary-600">
+                                    <x-filament::icon icon="heroicon-o-sparkles" class="h-6 w-6" />
+                                    <h3 class="font-bold text-lg">{{ $history['checker'] ?? 'Unknown' }}</h3>
+                                </div>
+                                <span class="text-xs text-gray-500 font-mono">{{ $history['date'] ?? '' }}</span>
+                            </div>
+                            <div class="prose dark:prose-invert max-w-none text-sm" style="line-height: 1.8;" dir="rtl">
+                                {!! \Illuminate\Support\Str::markdown($history['response'] ?? '') !!}
+                            </div>
+                        </x-filament::section>
+                    @empty
+                        <x-filament::section>
+                            <p class="text-gray-500 text-center py-6">
+                                {{ $isFa ? 'هیچ تحلیلی هنوز ثبت نشده است.' : 'No AI analyses recorded yet.' }}
+                            </p>
+                        </x-filament::section>
+                    @endforelse
                 </div>
             </div>
         </div>
