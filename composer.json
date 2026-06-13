@@ -1,0 +1,22 @@
+{
+    "name": "vjects/pulse",
+    "description": "V-Pulse Self-Diagnostic and Autonomous Operations System",
+    "type": "library",
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^10.0|^11.0",
+        "filament/filament": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Vjects\\Pulse\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Vjects\\Pulse\\PulseServiceProvider"
+            ]
+        }
+    }
+}
