@@ -135,11 +135,11 @@ app('vjects-pulse')->registerChecker(\App\Checkers\PaymentGatewayChecker::class)
 
 ---
 
-## 📜 Changelog / Recent Updates
+### v1.2.0 (Dual-Server Architecture & Deep Scanning)
+- **Ecosystem Route Scanning**: The 500-Error Route Crawler now natively supports dual-server (Main + API) architectures. When `Ecosystem Mode` is active, V-Pulse automatically reaches into the API server's workspace to perform parallel HTTP 500 checks, presenting a unified diagnostic report.
+- **Filament Syntax Auto-Correction Compatibility**: Resolved deeply rooted `Target class [auth] does not exist` bugs by restructuring the crawler's application container initialization, bypassing multi-guard conflicts during isolated HTTP simulations.
 
-### v1.1.0 (Architecture Fixes)
-- **DatabaseChecker State Fix**: Resolved a critical logical bug where `$needsSeed` state was lost during fresh instance instantiation via Livewire's Action API, causing the `db:seed` fallback to silently fail. The checker now forces a re-run of its internal logic before applying fixes to ensure absolute consistency.
-- **Tailwind CSS Purge Immunity**: Refactored the pinging status dots (green/red indicators) to use explicit inline CSS (`style="background-color: ..."`) instead of Tailwind classes (`bg-success-500`). This completely prevents the host project's compiler from purging the styles, ensuring V-Pulse renders flawlessly regardless of the host's `tailwind.config.js`.
+> **Note on Future Updates:** V-Pulse is now in a stable base functional state. Further customizations and business-logic integrations will be rolled out in upcoming updates. If you encounter any anomalies or errors during production use, please report them to the development team immediately for hotfixing.
 
 ---
 

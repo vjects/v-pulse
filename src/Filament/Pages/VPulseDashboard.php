@@ -203,7 +203,23 @@ class VPulseDashboard extends Page implements HasForms
                 ->action(function () {
                     $userId = auth()->id() ?: 1;
                     $guard = filament()->getCurrentPanel()->getAuthGuard() ?? config('auth.defaults.guard');
-                    $output = shell_exec('php ' . base_path('artisan') . ' v-pulse:scan-routes --user=' . $userId . ' --guard=' . escapeshellarg($guard) . ' 2>&1');
+                    
+                    $outputMain = shell_exec('php ' . base_path('artisan') . ' v-pulse:scan-routes --user=' . $userId . ' --guard=' . escapeshellarg($guard) . ' 2>&1');
+                    
+                    $outputApi = '';
+                    $manager = app('vjects-pulse');
+                    if (($manager->getSettings()['mode'] ?? 'monolith') === 'ecosystem') {
+                        // For VJECTS exclusive architecture: execute the scan on the vjects-api directory
+                        $apiPath = dirname(base_path()) . '/vjects-api/artisan';
+                        if (file_exists($apiPath)) {
+                            $outputApi = "\n\n=== API Server Scan Results ===\n";
+                            $outputApi .= shell_exec('php ' . escapeshellarg($apiPath) . ' v-pulse:scan-routes 2>&1');
+                        } else {
+                            $outputApi = "\n\n=== API Server Scan Results ===\n[WARNING] vjects-api path not found at: {$apiPath}\n";
+                        }
+                    }
+                    
+                    $output = $outputMain . $outputApi;
                     
                     if (!$output) {
                         $output = "No output generated or failed to run command.";

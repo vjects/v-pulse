@@ -56,15 +56,14 @@ class ScanRoutesCommand extends Command
             }
             
             try {
-                // We create a fresh app instance for each route to prevent state bleeding
-                $app = require base_path('bootstrap/app.php');
-                $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
-                
                 $request = Request::create($testUri, 'GET');
+                
+                // Re-authenticate for the request explicitly on the guard singleton
                 if ($userId) {
-                    $app->make('auth')->guard($guard)->loginUsingId($userId);
+                    Auth::guard($guard)->loginUsingId($userId);
                 }
                 
+                $kernel = app(\Illuminate\Contracts\Http\Kernel::class);
                 $response = $kernel->handle($request);
                 $status = $response->getStatusCode();
                 
