@@ -24,29 +24,32 @@ class ApiConnectionChecker extends BaseChecker
     public function run(): array
     {
         $settings = $this->getSettings();
-        $apiUrl = rtrim($settings['api_ecosystem_url'] ?? '', '/');
+        $urls = $settings['api_ecosystem_urls'] ?? [];
         
-        if (empty($apiUrl)) {
+        if (empty($urls)) {
             return [
                 'success' => false,
                 'message' => $this->tr('api_no_url')
             ];
         }
 
-        try {
-            // Simulated API Check to vjects ecosystem master node
-            $response = Http::timeout(3)->get($apiUrl . '/health');
-            
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'message' => $this->tr('api_ok')
-                ];
+        $failedUrls = [];
+
+        foreach ($urls as $url) {
+            try {
+                $cleanUrl = rtrim($url, '/');
+                $response = Http::timeout(3)->get($cleanUrl . '/health');
+                
+                if (!$response->successful()) {
+                    $failedUrls[] = $url . ' (Status: ' . $response->status() . ')';
+                }
+            } catch (\Exception $e) {
+                $failedUrls[] = $url . ' (Error: ' . $e->getMessage() . ')';
             }
-            
-            throw new \Exception('Status code: ' . $response->status());
-        } catch (\Exception $e) {
-            $msg = $this->tr('api_fail', ['error' => $e->getMessage()]);
+        }
+        
+        if (!empty($failedUrls)) {
+            $msg = $this->tr('api_fail', ['error' => implode(', ', $failedUrls)]);
             
             if ($this->isLocal()) {
                 return [
@@ -60,6 +63,11 @@ class ApiConnectionChecker extends BaseChecker
                 'message' => $msg
             ];
         }
+
+        return [
+            'success' => true,
+            'message' => $this->tr('api_ok')
+        ];
     }
 
     public function getFixActionName(): ?string

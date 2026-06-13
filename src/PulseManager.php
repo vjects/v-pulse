@@ -55,9 +55,6 @@ class PulseManager
         return $this->checkers;
     }
 
-    /**
-     * Run all checkers safely.
-     */
     public function runChecks(): array
     {
         $results = [];
@@ -74,6 +71,10 @@ class PulseManager
 
             try {
                 $status = $checker->run();
+                if (!$status['success']) {
+                    $this->logError($checker->getName() . ' | ' . $status['message']);
+                }
+                
                 $results[] = [
                     'name' => $checker->getName(),
                     'description' => $checker->getDescription(),
@@ -83,6 +84,7 @@ class PulseManager
                     'instance' => $checker,
                 ];
             } catch (\Throwable $e) {
+                $this->logError($checker->getName() . ' | Exception: ' . $e->getMessage());
                 $results[] = [
                     'name' => $checker->getName(),
                     'description' => $checker->getDescription(),
@@ -95,5 +97,13 @@ class PulseManager
         }
 
         return $results;
+    }
+
+    protected function logError(string $message): void
+    {
+        $logPath = storage_path('logs/vpulse.log');
+        $date = date('Y-m-d H:i:s');
+        $line = "[$date] $message\n";
+        file_put_contents($logPath, $line, FILE_APPEND);
     }
 }

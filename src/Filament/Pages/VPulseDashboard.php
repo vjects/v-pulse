@@ -34,14 +34,19 @@ class VPulseDashboard extends Page implements HasForms
     }
     public function form(Form $form): Form
     {
+        /** @var PulseManager $manager */
+        $manager = app('vjects-pulse');
+        $lang = $manager->getSettings()['system_language'] ?? 'fa';
+        $isFa = $lang === 'fa';
+        
         return $form
             ->schema([
                 \Filament\Forms\Components\Tabs::make('Settings')
                     ->tabs([
-                        \Filament\Forms\Components\Tabs\Tab::make('General Scope')
+                        \Filament\Forms\Components\Tabs\Tab::make($isFa ? 'تنظیمات پایه' : 'General Scope')
                             ->schema([
                                 Select::make('system_language')
-                                    ->label('System Interface Language')
+                                    ->label($isFa ? 'زبان رابط کاربری سیستم' : 'System Interface Language')
                                     ->options([
                                         'fa' => 'فارسی (Persian)',
                                         'en' => 'English',
@@ -51,73 +56,73 @@ class VPulseDashboard extends Page implements HasForms
                                     ->live(),
                                     
                                 Select::make('system_environment')
-                                    ->label('Environment Type')
+                                    ->label($isFa ? 'نوع محیط اجرا' : 'Environment Type')
                                     ->options([
-                                        'local' => 'Local / Development',
-                                        'production' => 'Production / Live',
+                                        'local' => $isFa ? 'محیط لوکال / توسعه' : 'Local / Development',
+                                        'production' => $isFa ? 'محیط اصلی / پروداکشن' : 'Production / Live',
                                     ])
                                     ->default('production')
                                     ->required()
                                     ->live(),
                                     
                                 Select::make('mode')
-                                    ->label('Architecture Mode')
+                                    ->label($isFa ? 'معماری سیستم' : 'Architecture Mode')
                                     ->options([
-                                        'monolith' => 'Monolith (Single Server)',
-                                        'ecosystem' => 'Distributed Ecosystem',
+                                        'monolith' => $isFa ? 'مونولیت (تک سرور)' : 'Monolith (Single Server)',
+                                        'ecosystem' => $isFa ? 'اکوسیستم یکپارچه توزیع‌شده' : 'Distributed Ecosystem',
                                     ])
                                     ->required()
                                     ->live(),
                                     
-                                \Filament\Forms\Components\TextInput::make('api_ecosystem_url')
-                                    ->label('API Ecosystem Base URL')
-                                    ->placeholder('https://api.yourdomain.com')
-                                    ->helperText('آدرس پایه سرور API را وارد کنید (فقط برای حالت اکوسیستم)')
+                                \Filament\Forms\Components\TagsInput::make('api_ecosystem_urls')
+                                    ->label($isFa ? 'آدرس سرورهای اکوسیستم' : 'API Ecosystem Base URLs')
+                                    ->placeholder($isFa ? 'آدرس وارد کنید و اینتر بزنید...' : 'Enter URL and press enter...')
+                                    ->helperText($isFa ? 'آدرس پایه سرورهای متصل را وارد کنید (فقط برای حالت اکوسیستم)' : 'Enter the base URLs of the connected servers (only for ecosystem mode)')
                                     ->visible(fn (\Filament\Forms\Get $get) => $get('mode') === 'ecosystem'),
                                     
                                 CheckboxList::make('modules')
-                                    ->label('Active Modules')
+                                    ->label($isFa ? 'ماژول‌های فعال' : 'Active Modules')
                                     ->options([
-                                        'ai' => 'AI Service',
-                                        'ftp' => 'External FTP Nodes',
-                                        's3' => 'S3 Storage Nodes',
-                                        'telegram' => 'Telegram Alerts',
-                                        'security' => 'Security Threat Scanner',
+                                        'ai' => $isFa ? 'سرویس هوش مصنوعی' : 'AI Service',
+                                        'ftp' => $isFa ? 'نودهای خارجی FTP' : 'External FTP Nodes',
+                                        's3' => $isFa ? 'نودهای ذخیره‌سازی S3' : 'S3 Storage Nodes',
+                                        'telegram' => $isFa ? 'هشدارهای تلگرامی' : 'Telegram Alerts',
+                                        'security' => $isFa ? 'اسکنر تهدیدات امنیتی' : 'Security Threat Scanner',
                                     ])
                                     ->columns(3),
                             ]),
                         
-                        \Filament\Forms\Components\Tabs\Tab::make('Telegram & Proxy')
+                        \Filament\Forms\Components\Tabs\Tab::make($isFa ? 'تلگرام و پروکسی' : 'Telegram & Proxy')
                             ->schema([
                                 \Filament\Forms\Components\TextInput::make('telegram_bot_token')
-                                    ->label('Bot Token')
+                                    ->label($isFa ? 'توکن ربات' : 'Bot Token')
                                     ->password(),
                                     
                                 \Filament\Forms\Components\TextInput::make('telegram_chat_id')
-                                    ->label('Chat ID'),
+                                    ->label($isFa ? 'شناسه چت (Chat ID)' : 'Chat ID'),
                                     
                                 \Filament\Forms\Components\Toggle::make('use_telegram_proxy')
-                                    ->label('Use Proxy (MTProto/HTTP)')
+                                    ->label($isFa ? 'استفاده از پروکسی' : 'Use Proxy (MTProto/HTTP)')
                                     ->live(),
                                     
                                 \Filament\Forms\Components\Grid::make(3)
                                     ->schema([
                                         \Filament\Forms\Components\TextInput::make('proxy_server')
-                                            ->label('Proxy Server IP/Host'),
+                                            ->label($isFa ? 'آدرس سرور پروکسی' : 'Proxy Server IP/Host'),
                                         \Filament\Forms\Components\TextInput::make('proxy_port')
-                                            ->label('Proxy Port')
+                                            ->label($isFa ? 'پورت' : 'Proxy Port')
                                             ->numeric(),
                                         \Filament\Forms\Components\TextInput::make('proxy_secret')
-                                            ->label('Proxy Secret / Credentials')
+                                            ->label($isFa ? 'رمز پروکسی' : 'Proxy Secret / Credentials')
                                             ->password(),
                                     ])
                                     ->visible(fn (\Filament\Forms\Get $get) => $get('use_telegram_proxy') === true)
                             ]),
                             
-                        \Filament\Forms\Components\Tabs\Tab::make('AI Assistant')
+                        \Filament\Forms\Components\Tabs\Tab::make($isFa ? 'دستیار هوش مصنوعی' : 'AI Assistant')
                             ->schema([
                                 \Filament\Forms\Components\Select::make('ai_language')
-                                    ->label('AI Response Language')
+                                    ->label($isFa ? 'زبان پاسخ‌دهی هوش مصنوعی' : 'AI Response Language')
                                     ->options([
                                         'fa' => 'فارسی (Persian)',
                                         'en' => 'English',
@@ -126,22 +131,22 @@ class VPulseDashboard extends Page implements HasForms
                                     ->required(),
                                     
                                 \Filament\Forms\Components\Select::make('ai_provider')
-                                    ->label('LLM Provider')
+                                    ->label($isFa ? 'سرویس‌دهنده' : 'LLM Provider')
                                     ->options([
                                         'openai' => 'OpenAI (GPT)',
                                         'google' => 'Google Gemini',
                                         'qwen' => 'Qwen',
                                     ]),
                                 \Filament\Forms\Components\TextInput::make('ai_model')
-                                    ->label('AI Model Name')
+                                    ->label($isFa ? 'نام مدل (Model Name)' : 'AI Model Name')
                                     ->placeholder('e.g. qwen3.6-flash, gpt-4o, gemini-1.5-pro')
-                                    ->helperText('مدل خاصی که دستیار باید استفاده کند را وارد کنید.'),
+                                    ->helperText($isFa ? 'مدل خاصی که دستیار باید استفاده کند را وارد کنید.' : 'Enter the specific model name you want the assistant to use.'),
                                 \Filament\Forms\Components\TextInput::make('ai_api_key')
-                                    ->label('API Key')
+                                    ->label($isFa ? 'کلید ارتباطی (API Key)' : 'API Key')
                                     ->password(),
                             ]),
                     ])
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
             ])
             ->statePath('data');
     }
@@ -258,6 +263,33 @@ class VPulseDashboard extends Page implements HasForms
         $manager->registerChecker(\Vjects\Pulse\Checkers\SecurityChecker::class);
         
         return $manager->runChecks();
+    }
+    
+    public function getLogs(): string
+    {
+        $logPath = storage_path('logs/vpulse.log');
+        $isFa = ($this->data['system_language'] ?? 'fa') === 'fa';
+        
+        if (!file_exists($logPath)) {
+            return $isFa ? 'هیچ خطایی ثبت نشده است.' : 'No errors logged yet.';
+        }
+        
+        $lines = array_slice(file($logPath), -100);
+        return implode('', array_reverse($lines));
+    }
+    
+    public function clearLogs(): void
+    {
+        $logPath = storage_path('logs/vpulse.log');
+        if (file_exists($logPath)) {
+            unlink($logPath);
+        }
+        
+        $isFa = ($this->data['system_language'] ?? 'fa') === 'fa';
+        \Filament\Notifications\Notification::make()
+            ->title($isFa ? 'لاگ‌ها پاک شدند' : 'Logs Cleared')
+            ->success()
+            ->send();
     }
 
     public function fixAction(string $checkerClass): void
