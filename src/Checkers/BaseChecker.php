@@ -79,6 +79,13 @@ abstract class BaseChecker implements CheckerInterface
                 'tg_ok' => 'Telegram Bot is connected and responding.',
                 'tg_fail' => 'Telegram Connection Failed: :error',
                 'tg_local_note' => ' (Local environment often lacks proxy setup. Ignored.)',
+                
+                'queue_name' => 'Background Jobs Health',
+                'queue_desc' => 'Monitors Laravel queues for failed jobs and excessive backlog.',
+                'queue_ok' => 'Queue is healthy. No failed jobs and backlog is normal.',
+                'queue_failed' => 'Danger: :count jobs have failed and require attention!',
+                'queue_backed_up' => 'Warning: Queue is heavily backed up (:count pending jobs). Ensure Queue Worker is running!',
+                'queue_fix' => 'Retry Failed Jobs',
             ],
             'fa' => [
                 'db_name' => 'سلامت دیتابیس مرکزی',
@@ -109,6 +116,13 @@ abstract class BaseChecker implements CheckerInterface
                 'tg_ok' => 'ربات تلگرام متصل است و پاسخ می‌دهد.',
                 'tg_fail' => 'خطا در اتصال تلگرام: :error',
                 'tg_local_note' => ' (در محیط لوکال معمولا تنظیمات پروکسی وجود ندارد. نادیده گرفته شد.)',
+                
+                'queue_name' => 'سلامت صف‌بندی و پردازش‌ها',
+                'queue_desc' => 'بررسی وضعیت صف‌های لاراول و شناسایی جاب‌های شکست خورده یا تلنبار شده.',
+                'queue_ok' => 'صف‌ها در وضعیت سالم هستند. هیچ جاب شکست خورده‌ای وجود ندارد.',
+                'queue_failed' => 'اخطار جدی: :count جاب شکست خورده یافت شد!',
+                'queue_backed_up' => 'هشدار: صف بسیار شلوغ است (:count جاب در انتظار). مطمئن شوید Worker فعال است!',
+                'queue_fix' => 'تلاش مجدد جاب‌های شکست خورده',
             ]
         ];
 

@@ -114,7 +114,15 @@ class PulseManager
         $results = [];
         $settings = $this->getSettings();
 
-        foreach ($this->checkers as $checkerClass) {
+        $defaultCheckers = [
+            Checkers\DatabaseChecker::class,
+            Checkers\QueueChecker::class,
+            Checkers\ApiConnectionChecker::class,
+            Checkers\SecurityChecker::class,
+            Checkers\TelegramConnectionChecker::class,
+        ];
+
+        foreach (array_merge($this->checkers, $defaultCheckers) as $checkerClass) {
             /** @var \Vjects\Pulse\Checkers\CheckerInterface $checker */
             $checker = app($checkerClass);
 
