@@ -24,7 +24,14 @@ class VPulseWidget extends Widget
         $manager->registerChecker(\Vjects\Pulse\Checkers\TelegramConnectionChecker::class);
         $manager->registerChecker(\Vjects\Pulse\Checkers\SecurityChecker::class);
         
-        $this->results = $manager->runChecks();
+        $rawResults = $manager->runChecks();
+        
+        // Strip out non-serializable objects to prevent Livewire hydration errors
+        foreach ($rawResults as &$res) {
+            unset($res['instance']);
+        }
+        
+        $this->results = $rawResults;
         $this->isLoading = false;
     }
 }
