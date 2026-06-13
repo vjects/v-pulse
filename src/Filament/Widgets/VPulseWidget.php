@@ -12,10 +12,13 @@ class VPulseWidget extends Widget
     protected static ?int $sort = -1;
 
     public array $results = [];
-    public bool $isLoading = true;
+    public bool $isLoading = false;
+    public bool $hasScanned = false;
 
     public function loadDiagnostics()
     {
+        $this->isLoading = true;
+        
         $manager = app('vjects-pulse');
         
         // Register default checkers
@@ -33,5 +36,6 @@ class VPulseWidget extends Widget
         
         $this->results = $rawResults;
         $this->isLoading = false;
+        $this->hasScanned = true;
     }
 }

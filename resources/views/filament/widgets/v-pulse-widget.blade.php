@@ -120,11 +120,21 @@
                 </button>
             </div>
 
-            <div wire:init="loadDiagnostics">
+            <div>
                 @if($isLoading)
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 2rem; opacity: 0.6;">
-                        <x-filament::loading-indicator class="h-5 w-5" />
-                        <span>در حال ارتباط با سرورها و پردازش وضعیت...</span>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-top: 3rem; margin-bottom: 2rem; opacity: 0.7;">
+                        <x-filament::loading-indicator class="h-6 w-6" />
+                        <span style="font-weight: 500;">در حال ارتباط با سرورها و پردازش وضعیت...</span>
+                    </div>
+                @elseif(!$hasScanned)
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; margin-top: 3rem; margin-bottom: 2rem; text-align: center; opacity: 0.8;">
+                        <x-heroicon-o-shield-check style="width: 4rem; height: 4rem; color: #9ca3af;" />
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0;">آماده برای بررسی وضعیت سیستم</h3>
+                        <p style="font-size: 0.9rem; max-width: 400px; margin: 0;">برای جلوگیری از فشار به سرور، اسکن به صورت خودکار انجام نمی‌شود. لطفاً برای مشاهده سلامت سیستم روی دکمه اسکن کلیک کنید.</p>
+                        <button wire:click="loadDiagnostics" type="button" style="margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 0.5rem; background-color: #3b82f6; padding: 0.75rem 1.5rem; color: white; cursor: pointer; font-weight: 600; border: none;">
+                            <x-heroicon-m-play style="width: 1.25rem; height: 1.25rem;" />
+                            <span>شروع اسکن زیرساخت</span>
+                        </button>
                     </div>
                 @else
                     <!-- Grid -->
