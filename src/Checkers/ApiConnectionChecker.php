@@ -69,9 +69,4 @@ class ApiConnectionChecker extends BaseChecker
             'message' => $this->tr('api_ok')
         ];
     }
-
-    public function getFixActionName(): ?string
-    {
-        return $this->tr('api_fix');
-    }
 }
