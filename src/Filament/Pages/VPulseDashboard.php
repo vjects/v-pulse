@@ -69,6 +69,12 @@ class VPulseDashboard extends Page implements HasForms
                                     ->required()
                                     ->live(),
                                     
+                                \Filament\Forms\Components\TextInput::make('api_ecosystem_url')
+                                    ->label('API Ecosystem Base URL')
+                                    ->placeholder('https://api.yourdomain.com')
+                                    ->helperText('آدرس پایه سرور API را وارد کنید (فقط برای حالت اکوسیستم)')
+                                    ->visible(fn (\Filament\Forms\Get $get) => $get('mode') === 'ecosystem'),
+                                    
                                 CheckboxList::make('modules')
                                     ->label('Active Modules')
                                     ->options([
@@ -161,11 +167,84 @@ class VPulseDashboard extends Page implements HasForms
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('testTelegram')
+                ->label('تست ارسال به تلگرام')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('info')
+                ->action('sendTelegramTest')
+                ->visible(fn () => in_array('telegram', $this->data['modules'] ?? []) && !empty($this->data['telegram_bot_token'])),
+                
             Action::make('save')
                 ->label('Save Settings')
                 ->action('saveSettings')
                 ->color('primary'),
         ];
+    }
+    
+    public function sendTelegramTest(): void
+    {
+        /** @var PulseManager $manager */
+        $manager = app('vjects-pulse');
+        $settings = $manager->getSettings();
+        
+        $token = $settings['telegram_bot_token'] ?? null;
+        $chatId = $settings['telegram_chat_id'] ?? null;
+        
+        if (!$token || !$chatId) {
+            \Filament\Notifications\Notification::make()
+                ->title('خطا در تنظیمات')
+                ->body('توکن ربات یا Chat ID تنظیم نشده است.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        // Gather errors from checkers
+        $results = $this->getCheckResults();
+        $errors = array_filter($results, fn($r) => $r['status'] !== 'success');
+        
+        $options = [];
+        if (($settings['use_telegram_proxy'] ?? false) && !empty($settings['proxy_server'])) {
+            $options['proxy'] = $settings['proxy_server'] . ':' . ($settings['proxy_port'] ?? 80);
+        }
+        
+        try {
+            if (empty($errors)) {
+                // Send a generic success message
+                $msg = "✅ سیستم V-Pulse در سلامت کامل است.\nهیچ خطایی یافت نشد.";
+                \Illuminate\Support\Facades\Http::timeout(10)->withOptions($options)
+                    ->post("https://api.telegram.org/bot{$token}/sendMessage", [
+                        'chat_id' => $chatId,
+                        'text' => $msg,
+                    ]);
+            } else {
+                // Send each error as a separate message
+                foreach ($errors as $error) {
+                    $msg = "🚨 هشدار (V-Pulse)\n\n";
+                    $msg .= "نام بررسی: {$error['name']}\n";
+                    $msg .= "توضیحات: {$error['message']}\n";
+                    
+                    \Illuminate\Support\Facades\Http::timeout(10)->withOptions($options)
+                        ->post("https://api.telegram.org/bot{$token}/sendMessage", [
+                            'chat_id' => $chatId,
+                            'text' => $msg,
+                        ]);
+                }
+            }
+            
+            \Filament\Notifications\Notification::make()
+                ->title('تست با موفقیت انجام شد')
+                ->body('پیام‌ها به ربات تلگرام ارسال شدند.')
+                ->success()
+                ->send();
+                
+        } catch (\Exception $e) {
+            \Filament\Notifications\Notification::make()
+                ->title('خطا در ارسال به تلگرام')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 
     public function getCheckResults(): array

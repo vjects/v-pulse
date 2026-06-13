@@ -61,6 +61,7 @@ abstract class BaseChecker implements CheckerInterface
                 'api_desc' => 'Checks if the Master server can ping the API Ecosystem server.',
                 'api_ok' => 'API Ecosystem is reachable.',
                 'api_fail' => 'Network request failed: :error',
+                'api_no_url' => 'API Ecosystem URL is not configured in settings.',
                 'api_local_note' => ' (Note: In Local environment, API servers might be offline. This is safe to ignore.)',
                 'api_fix' => 'Run Diagnose Tool',
                 
@@ -88,6 +89,7 @@ abstract class BaseChecker implements CheckerInterface
                 'api_desc' => 'بررسی پینگ بین سرور مستر و سرور اکوسیستم API.',
                 'api_ok' => 'اکوسیستم API در دسترس است.',
                 'api_fail' => 'خطای شبکه در اتصال: :error',
+                'api_no_url' => 'آدرس سرور API در تنظیمات وارد نشده است.',
                 'api_local_note' => ' (توجه: در محیط لوکال، خاموش بودن سرورهای API طبیعی است و نادیده گرفته می‌شود.)',
                 'api_fix' => 'اجرای ابزار عیب‌یابی',
                 

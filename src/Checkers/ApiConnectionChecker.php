@@ -23,9 +23,19 @@ class ApiConnectionChecker extends BaseChecker
 
     public function run(): array
     {
+        $settings = $this->getSettings();
+        $apiUrl = rtrim($settings['api_ecosystem_url'] ?? '', '/');
+        
+        if (empty($apiUrl)) {
+            return [
+                'success' => false,
+                'message' => $this->tr('api_no_url')
+            ];
+        }
+
         try {
             // Simulated API Check to vjects ecosystem master node
-            $response = Http::timeout(3)->get('https://api.vjects.com/health');
+            $response = Http::timeout(3)->get($apiUrl . '/health');
             
             if ($response->successful()) {
                 return [
