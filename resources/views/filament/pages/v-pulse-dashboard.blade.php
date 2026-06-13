@@ -1,5 +1,4 @@
 <x-filament-panels::page>
-    <div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         @php
             $isFa = ($this->data['system_language'] ?? 'fa') === 'fa';
@@ -17,7 +16,9 @@
                     {{ $isFa ? 'تنظیمات پایه‌ای ماژول‌ها و معماری سرورها را اینجا مشخص کنید.' : 'Define the architecture mode and module settings here.' }}
                 </p>
                 
-                {{ $this->form }}
+                <form wire:submit="saveSettings">
+                    {{ $this->form }}
+                </form>
                 
             </x-filament::section>
         </div>
@@ -234,8 +235,6 @@
                 </div>
             </div>
         </div>
-        
-    </div>
 
     <x-filament::modal id="ai-analysis-modal" width="3xl">
         <x-slot name="heading">
@@ -253,5 +252,4 @@
         </x-slot>
     </x-filament::modal>
 
-    </div>
 </x-filament-panels::page>
