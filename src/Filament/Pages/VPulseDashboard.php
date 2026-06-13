@@ -202,7 +202,8 @@ class VPulseDashboard extends Page implements HasForms
                 ->modalDescription($isFa ? 'این عملیات تمامی صفحات سایت و پنل را پردازش می‌کند و ممکن است تا چند دقیقه طول بکشد. آیا مطمئن هستید؟' : 'This will process all routes and may take a few minutes. Are you sure?')
                 ->action(function () {
                     $userId = auth()->id() ?: 1;
-                    $output = shell_exec('php ' . base_path('artisan') . ' v-pulse:scan-routes --user=' . $userId . ' 2>&1');
+                    $guard = filament()->getCurrentPanel()->getAuthGuard() ?? config('auth.defaults.guard');
+                    $output = shell_exec('php ' . base_path('artisan') . ' v-pulse:scan-routes --user=' . $userId . ' --guard=' . escapeshellarg($guard) . ' 2>&1');
                     
                     if (!$output) {
                         $output = "No output generated or failed to run command.";

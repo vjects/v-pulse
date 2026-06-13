@@ -9,14 +9,16 @@ use Illuminate\Support\Facades\Auth;
 
 class ScanRoutesCommand extends Command
 {
-    protected $signature = 'v-pulse:scan-routes {--user= : The user ID to authenticate as}';
+    protected $signature = 'v-pulse:scan-routes {--user= : The user ID to authenticate as} {--guard= : The auth guard to use}';
     protected $description = 'Scan all GET routes for HTTP 500 errors';
 
     public function handle()
     {
         $userId = $this->option('user');
+        $guard = $this->option('guard') ?: config('auth.defaults.guard');
+        
         if ($userId) {
-            Auth::loginUsingId($userId);
+            Auth::guard($guard)->loginUsingId($userId);
         }
 
         $routes = Route::getRoutes()->getRoutesByMethod()['GET'] ?? [];
@@ -60,7 +62,7 @@ class ScanRoutesCommand extends Command
                 
                 $request = Request::create($testUri, 'GET');
                 if ($userId) {
-                    $app->make('auth')->loginUsingId($userId);
+                    $app->make('auth')->guard($guard)->loginUsingId($userId);
                 }
                 
                 $response = $kernel->handle($request);
