@@ -186,9 +186,6 @@ class VPulseDashboard extends Page implements HasForms
         $this->redirect(request()->header('Referer'));
     }
 
-    /**
-     * @return array<Action>
-     */
     protected function getHeaderActions(): array
     {
         /** @var PulseManager $manager */
@@ -196,6 +193,30 @@ class VPulseDashboard extends Page implements HasForms
         $isFa = ($manager->getSettings()['system_language'] ?? 'fa') === 'fa';
 
         return [
+            Action::make('runErrorCrawler')
+                ->label($isFa ? 'اسکن خطاهای ۵۰۰ (Route Crawler)' : 'Scan 500 Errors')
+                ->icon('heroicon-o-bug-ant')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalHeading($isFa ? 'اسکن مسیرهای سیستم' : 'System Route Scan')
+                ->modalDescription($isFa ? 'این عملیات تمامی صفحات سایت و پنل را پردازش می‌کند و ممکن است تا چند دقیقه طول بکشد. آیا مطمئن هستید؟' : 'This will process all routes and may take a few minutes. Are you sure?')
+                ->action(function () {
+                    $userId = auth()->id() ?: 1;
+                    $output = shell_exec('php ' . base_path('artisan') . ' v-pulse:scan-routes --user=' . $userId . ' 2>&1');
+                    
+                    if (!$output) {
+                        $output = "No output generated or failed to run command.";
+                    }
+                    
+                    $fileName = 'v-pulse-error-report-' . date('Y-m-d-H-i-s') . '.txt';
+                    
+                    return response()->streamDownload(function () use ($output) {
+                        echo $output;
+                    }, $fileName, [
+                        'Content-Type' => 'text/plain',
+                    ]);
+                }),
+                
             Action::make('testTelegram')
                 ->label($isFa ? 'تست ارسال به تلگرام' : 'Test Telegram')
                 ->icon('heroicon-o-paper-airplane')
