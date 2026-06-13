@@ -112,6 +112,12 @@ class VPulseDashboard extends Page implements HasForms
         $manager = app('vjects-pulse');
         $manager->saveSettings($this->form->getState());
         
+        \Filament\Notifications\Notification::make()
+            ->title('Settings Saved')
+            ->body('V-Pulse scope settings have been successfully updated.')
+            ->success()
+            ->send();
+            
         $this->redirect(request()->header('Referer'));
     }
 
@@ -147,9 +153,35 @@ class VPulseDashboard extends Page implements HasForms
             /** @var \Vjects\Pulse\Checkers\CheckerInterface $checker */
             $checker = app($checkerClass);
             $checker->executeFix();
+            
+            \Filament\Notifications\Notification::make()
+                ->title('Action Executed')
+                ->body('The fix action was triggered successfully.')
+                ->success()
+                ->send();
+                
             $this->redirect(request()->header('Referer'));
         } catch (\Exception $e) {
-            // Log or show error
+            \Filament\Notifications\Notification::make()
+                ->title('Action Failed')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
         }
+    }
+
+    public function analyzeWithAi(string $checkerClass): void
+    {
+        // Stub for LLM integration.
+        // In a full implementation, this will send the checker's failing status 
+        // to the selected LLM provider (Qwen, GPT, etc.) and return a suggestion.
+        
+        \Filament\Notifications\Notification::make()
+            ->title('AI Analysis Initiated')
+            ->body('Sending diagnostic data to the LLM agent...')
+            ->info()
+            ->send();
+            
+        // ... AI Agent API call logic goes here ...
     }
 }

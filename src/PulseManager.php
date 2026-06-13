@@ -30,7 +30,12 @@ class PulseManager
      */
     public function saveSettings(array $settings): void
     {
-        $path = storage_path('app/vpulse.json');
+        $dir = storage_path('app');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $path = $dir . '/vpulse.json';
         file_put_contents($path, json_encode($settings, JSON_PRETTY_PRINT));
     }
 
