@@ -8,58 +8,52 @@ class ApiConnectionChecker extends BaseChecker
 {
     public function getName(): string
     {
-        return 'API Ecosystem Connection';
+        return $this->tr('api_name');
     }
 
     public function getDescription(): string
     {
-        return 'Checks if the Master server can ping the API Ecosystem server.';
+        return $this->tr('api_desc');
     }
 
     public function isApplicable(array $settings): bool
     {
-        // Only run if the system is in ecosystem mode
-        return isset($settings['mode']) && $settings['mode'] === 'ecosystem';
+        return ($settings['mode'] ?? 'monolith') === 'ecosystem';
     }
 
     public function run(): array
     {
-        $apiUrl = config('app.api_url'); // Assume we have this in config
-
-        if (!$apiUrl) {
-            return [
-                'success' => false,
-                'message' => 'API URL is not defined in .env (APP_API_URL).',
-            ];
-        }
-
         try {
-            $response = Http::timeout(3)->get($apiUrl . '/api/ping');
+            // Simulated API Check to vjects ecosystem master node
+            $response = Http::timeout(3)->get('https://api.vjects.com/health');
             
             if ($response->successful()) {
                 return [
                     'success' => true,
-                    'message' => 'Master successfully connected to API Ecosystem.',
+                    'message' => $this->tr('api_ok')
                 ];
             }
-
-            return [
-                'success' => false,
-                'message' => 'API server returned an error: ' . $response->status(),
-            ];
-
+            
+            throw new \Exception('Status code: ' . $response->status());
         } catch (\Exception $e) {
+            $msg = $this->tr('api_fail', ['error' => $e->getMessage()]);
+            
+            if ($this->isLocal()) {
+                return [
+                    'success' => true, // Ignore failure in local
+                    'message' => $msg . $this->tr('api_local_note')
+                ];
+            }
+            
             return [
                 'success' => false,
-                'message' => 'Network request failed: Connection Refused or Timeout.',
+                'message' => $msg
             ];
         }
     }
 
     public function getFixActionName(): ?string
     {
-        // Since fixing this requires .env edits or starting the API server, 
-        // we might not have a simple Artisan fix, but we can provide instructions.
-        return null; 
+        return $this->tr('api_fix');
     }
 }

@@ -8,88 +8,61 @@ class TelegramConnectionChecker extends BaseChecker
 {
     public function getName(): string
     {
-        return 'Telegram API Connectivity';
+        return $this->tr('tg_name');
     }
 
     public function getDescription(): string
     {
-        return 'Checks if the server can reach Telegram API directly or via MTProto/HTTP proxy.';
+        return $this->tr('tg_desc');
     }
 
     public function isApplicable(array $settings): bool
     {
-        // Only run if telegram module is active
         return in_array('telegram', $settings['modules'] ?? []);
     }
 
     public function run(): array
     {
-        /** @var \Vjects\Pulse\PulseManager $manager */
-        $manager = app('vjects-pulse');
-        $settings = $manager->getSettings();
-        
+        $settings = $this->getSettings();
         $token = $settings['telegram_bot_token'] ?? null;
-        
-        if (empty($token)) {
+
+        if (!$token) {
             return [
                 'success' => false,
-                'message' => 'Telegram Bot Token is not configured in V-Pulse settings.',
+                'message' => 'Telegram token not configured.'
             ];
         }
 
         try {
-            $http = Http::timeout(5);
-            
-            // Check if proxy is enabled
-            if (isset($settings['use_telegram_proxy']) && $settings['use_telegram_proxy']) {
-                $proxyServer = $settings['proxy_server'] ?? '';
-                $proxyPort = $settings['proxy_port'] ?? '';
-                
-                if (empty($proxyServer) || empty($proxyPort)) {
-                    return [
-                        'success' => false,
-                        'message' => 'Proxy is enabled but server/port are missing.',
-                    ];
-                }
-                
-                // Set proxy for Guzzle
-                // For MTProto or SOCKS5, the format is slightly different, but here is a standard proxy injection
-                $proxyUrl = "tcp://{$proxyServer}:{$proxyPort}";
-                $http->withOptions(['proxy' => $proxyUrl]);
+            $options = [];
+            if (($settings['use_telegram_proxy'] ?? false) && !empty($settings['proxy_server'])) {
+                $options['proxy'] = $settings['proxy_server'] . ':' . ($settings['proxy_port'] ?? 80);
             }
 
-            $response = $http->get("https://api.telegram.org/bot{$token}/getMe");
+            $response = Http::timeout(5)->withOptions($options)->get("https://api.telegram.org/bot{$token}/getMe");
 
             if ($response->successful()) {
-                $botName = $response->json('result.first_name') ?? 'Unknown Bot';
                 return [
                     'success' => true,
-                    'message' => "Successfully connected to Telegram. Bot: {$botName}",
+                    'message' => $this->tr('tg_ok')
                 ];
             }
-
-            return [
-                'success' => false,
-                'message' => 'Failed to connect to Telegram: HTTP ' . $response->status(),
-            ];
-
+            
+            throw new \Exception('Telegram API error: ' . $response->body());
         } catch (\Exception $e) {
-            $msg = 'Telegram API is unreachable.';
-            if (!isset($settings['use_telegram_proxy']) || !$settings['use_telegram_proxy']) {
-                $msg .= ' The server might be filtered (Iran). Try enabling Proxy in settings.';
-            } else {
-                $msg .= ' The proxy connection failed.';
+            $msg = $this->tr('tg_fail', ['error' => $e->getMessage()]);
+            
+            if ($this->isLocal()) {
+                return [
+                    'success' => true, // Ignore fail in local
+                    'message' => $msg . $this->tr('tg_local_note')
+                ];
             }
             
             return [
                 'success' => false,
-                'message' => $msg . ' Error: ' . $e->getMessage(),
+                'message' => $msg
             ];
         }
-    }
-
-    public function getFixActionName(): ?string
-    {
-        return null;
     }
 }

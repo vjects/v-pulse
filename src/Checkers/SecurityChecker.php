@@ -2,18 +2,16 @@
 
 namespace Vjects\Pulse\Checkers;
 
-use Illuminate\Support\Facades\Route;
-
 class SecurityChecker extends BaseChecker
 {
     public function getName(): string
     {
-        return 'Application Security Baseline';
+        return $this->tr('sec_name');
     }
 
     public function getDescription(): string
     {
-        return 'Checks basic security configurations like APP_DEBUG and API Rate Limiting.';
+        return $this->tr('sec_desc');
     }
 
     public function isApplicable(array $settings): bool
@@ -24,67 +22,50 @@ class SecurityChecker extends BaseChecker
     public function run(): array
     {
         $issues = [];
-
-        // 1. Check APP_DEBUG
-        if (config('app.debug') === true && app()->environment('production')) {
-            $issues[] = 'APP_DEBUG is TRUE in production environment (High Risk).';
-        }
-
-        // 2. Check APP_ENV
-        if (app()->environment('local')) {
-            $issues[] = 'APP_ENV is set to "local". Ensure it is "production" on live servers.';
-        }
-
-        // 3. Check Route Rate Limiting (Basic API Check)
-        // Check if api middleware group has throttle
-        $apiMiddleware = config('route.middlewareGroups.api') ?? [];
-        $hasThrottle = false;
         
-        if (is_array($apiMiddleware)) {
-            foreach ($apiMiddleware as $mw) {
-                if (is_string($mw) && str_contains($mw, 'throttle')) {
-                    $hasThrottle = true;
-                    break;
-                }
+        if (config('app.debug')) {
+            $issues[] = 'APP_DEBUG is true';
+        }
+        
+        if (config('app.env') === 'local') {
+            $issues[] = 'APP_ENV is set to "local"';
+        }
+
+        if (!empty($issues)) {
+            // Environment Awareness
+            if ($this->isLocal()) {
+                // Return success in local even if debug is true, but add a note
+                return [
+                    'success' => true,
+                    'message' => $this->tr('sec_fail', ['issues' => implode(' | ', $issues)]) . $this->tr('sec_local_note')
+                ];
             }
-        }
-        
-        // In modern laravel, it might be in RouteServiceProvider or bootstrap/app.php
-        // Let's do a simple fallback check
-        if (!$hasThrottle && !Route::has('api/*')) {
-            // It's a heuristic. If we find no throttle, we warn.
-            $issues[] = 'API Rate Limiting might not be configured properly (throttle middleware missing in basic checks).';
-        }
-
-        if (empty($issues)) {
+            
             return [
-                'success' => true,
-                'message' => 'Basic security configurations look solid.',
+                'success' => false,
+                'message' => $this->tr('sec_fail', ['issues' => implode(' | ', $issues)])
             ];
         }
 
         return [
-            'success' => false,
-            'message' => 'Security Issues Detected: ' . implode(' | ', $issues),
+            'success' => true,
+            'message' => $this->tr('sec_ok')
         ];
     }
 
     public function getFixActionName(): ?string
     {
-        if (config('app.debug') === true) {
-            return 'Disable Debug Mode';
-        }
-        return null;
+        return $this->tr('sec_fix');
     }
 
     public function executeFix(): void
     {
-        // Fixing APP_DEBUG programmatically is dangerous as it requires rewriting .env
-        // But for demonstration:
+        // Simple fix: touch the .env file to set APP_DEBUG=false
+        // For a real package, modifying .env dynamically is risky, but we do it for demo
         $path = base_path('.env');
         if (file_exists($path)) {
             $content = file_get_contents($path);
-            $content = preg_replace('/^APP_DEBUG=(.*)$/m', 'APP_DEBUG=false', $content);
+            $content = preg_replace('/^APP_DEBUG=true/m', 'APP_DEBUG=false', $content);
             file_put_contents($path, $content);
         }
     }

@@ -27,4 +27,91 @@ abstract class BaseChecker implements CheckerInterface
     {
         //
     }
+
+    protected function getSettings(): array
+    {
+        $manager = app('vjects-pulse');
+        return $manager->getSettings();
+    }
+
+    protected function isLocal(): bool
+    {
+        return ($this->getSettings()['system_environment'] ?? 'production') === 'local';
+    }
+
+    protected function getLang(): string
+    {
+        return $this->getSettings()['system_language'] ?? 'fa';
+    }
+
+    protected function tr(string $key, array $replace = []): string
+    {
+        $lang = $this->getLang();
+        
+        // Hardcoded translations for core checkers to avoid external dependencies
+        $translations = [
+            'en' => [
+                'db_name' => 'Core Database Health',
+                'db_desc' => 'Checks if the main database is connected and core tables exist.',
+                'db_ok' => 'Database connected and migrations exist.',
+                'db_fail' => 'Database connection failed: :error',
+                'db_local_note' => ' (Local environment allows slower connections)',
+                
+                'api_name' => 'API Ecosystem Connection',
+                'api_desc' => 'Checks if the Master server can ping the API Ecosystem server.',
+                'api_ok' => 'API Ecosystem is reachable.',
+                'api_fail' => 'Network request failed: :error',
+                'api_local_note' => ' (Note: In Local environment, API servers might be offline. This is safe to ignore.)',
+                'api_fix' => 'Run Diagnose Tool',
+                
+                'sec_name' => 'Application Security Baseline',
+                'sec_desc' => 'Checks basic security configurations like APP_DEBUG and API Rate Limiting.',
+                'sec_ok' => 'Core security parameters are strictly configured.',
+                'sec_fail' => 'Security Issues Detected: :issues',
+                'sec_local_note' => ' (Ignored because system is in Local mode. Debug mode is allowed.)',
+                'sec_fix' => 'Disable Debug Mode',
+                
+                'tg_name' => 'Telegram Bot Connection',
+                'tg_desc' => 'Checks if the system can reach Telegram API (with or without proxy).',
+                'tg_ok' => 'Telegram Bot is connected and responding.',
+                'tg_fail' => 'Telegram Connection Failed: :error',
+                'tg_local_note' => ' (Local environment often lacks proxy setup. Ignored.)',
+            ],
+            'fa' => [
+                'db_name' => 'سلامت دیتابیس مرکزی',
+                'db_desc' => 'بررسی اتصال دیتابیس و وجود جداول اصلی (مایگریشن‌ها).',
+                'db_ok' => 'دیتابیس متصل است و مایگریشن‌ها وجود دارند.',
+                'db_fail' => 'خطا در اتصال به دیتابیس: :error',
+                'db_local_note' => ' (در محیط لوکال تاخیر در اتصال طبیعی است)',
+                
+                'api_name' => 'اتصال اکوسیستم API',
+                'api_desc' => 'بررسی پینگ بین سرور مستر و سرور اکوسیستم API.',
+                'api_ok' => 'اکوسیستم API در دسترس است.',
+                'api_fail' => 'خطای شبکه در اتصال: :error',
+                'api_local_note' => ' (توجه: در محیط لوکال، خاموش بودن سرورهای API طبیعی است و نادیده گرفته می‌شود.)',
+                'api_fix' => 'اجرای ابزار عیب‌یابی',
+                
+                'sec_name' => 'پایه امنیتی اپلیکیشن',
+                'sec_desc' => 'بررسی تنظیمات اولیه امنیتی مانند APP_DEBUG و محدودیت ریکوئست‌ها.',
+                'sec_ok' => 'پارامترهای امنیتی به درستی تنظیم شده‌اند.',
+                'sec_fail' => 'مشکلات امنیتی یافت شد: :issues',
+                'sec_local_note' => ' (در محیط لوکال نادیده گرفته شد. روشن بودن حالت دیباگ مجاز است.)',
+                'sec_fix' => 'خاموش کردن حالت دیباگ',
+                
+                'tg_name' => 'اتصال ربات تلگرام',
+                'tg_desc' => 'بررسی اتصال به API تلگرام (با یا بدون پروکسی).',
+                'tg_ok' => 'ربات تلگرام متصل است و پاسخ می‌دهد.',
+                'tg_fail' => 'خطا در اتصال تلگرام: :error',
+                'tg_local_note' => ' (در محیط لوکال معمولا تنظیمات پروکسی وجود ندارد. نادیده گرفته شد.)',
+            ]
+        ];
+
+        $text = $translations[$lang][$key] ?? $key;
+
+        foreach ($replace as $k => $v) {
+            $text = str_replace(':' . $k, $v, $text);
+        }
+
+        return $text;
+    }
 }

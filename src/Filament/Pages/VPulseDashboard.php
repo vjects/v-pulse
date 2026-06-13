@@ -47,7 +47,18 @@ class VPulseDashboard extends Page implements HasForms
                                         'en' => 'English',
                                     ])
                                     ->default('fa')
-                                    ->required(),
+                                    ->required()
+                                    ->live(),
+                                    
+                                Select::make('system_environment')
+                                    ->label('Environment Type')
+                                    ->options([
+                                        'local' => 'Local / Development',
+                                        'production' => 'Production / Live',
+                                    ])
+                                    ->default('production')
+                                    ->required()
+                                    ->live(),
                                     
                                 Select::make('mode')
                                     ->label('Architecture Mode')
