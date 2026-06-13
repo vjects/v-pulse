@@ -1,58 +1,56 @@
-# V-Pulse System Diagnostics
+# V-Pulse ⚡️
 
-V-Pulse is a powerful, dynamic, and multi-lingual system diagnostics package for Laravel and Filament v3. It acts as the heartbeat monitor for your entire software ecosystem.
+**V-Pulse** is an advanced, self-contained diagnostic and DevOps assistant designed exclusively for the **VJECTS Ecosystem**. It continuously monitors your infrastructure, background queues, AI modules, and basic security settings, ensuring your application runs flawlessly without silent failures.
 
-## 🚀 Features
+## 🚀 Key Features
 
-- **Distributed Ecosystem Support**: Monitor single monolith apps or an array of distributed API nodes simultaneously.
-- **Environment Awareness**: Automatically ignores safe failures (like APP_DEBUG) when running in local development mode, and translates them intelligently.
-- **AI Diagnostics Assistant**: Integrates with LLMs (Qwen, OpenAI GPT, Google Gemini) to analyze failing components and instantly provide step-by-step resolution plans in native Filament Modals.
-- **Built-in Localization**: Fully independent translation system without overriding Laravel's core language files. Supports Persian (فارسی) and English interfaces and logs natively.
-- **Telegram Alerting**: Send individual, detailed alert messages to Telegram directly from the dashboard. Supports MTProto/HTTP proxies for restricted regions.
-- **Native Logging System**: Keeps a chronological history of all errors and system health checks in the configured language, viewable directly from the dashboard.
-- **Premium UI Widgets**: Includes high-end, cyberpunk-inspired Filament widgets for a stunning admin dashboard experience.
+V-Pulse is not just a passive dashboard; it is an active assistant that can automatically resolve common DevOps issues.
 
-## ⚙️ Installation
+- **8 Intelligent Sensors**:
+  - `DatabaseChecker`: Verifies DB connection and checks for missing baseline data (Seed check).
+  - `QueueChecker`: Monitors pending backlog and failed jobs.
+  - `MailChecker`: Verifies SMTP socket connections.
+  - `CacheChecker`: Ensures the application is not using slow cache drivers (file/database) in production.
+  - `RedisChecker`: Verifies high-speed Redis connectivity.
+  - `ApiConnectionChecker`: Checks network connectivity to the centralized API ecosystem.
+  - `SecurityChecker`: Enforces production security standards (e.g., APP_DEBUG=false).
+  - `TelegramChecker`: Validates Telegram Bot API and Proxy configuration.
 
-You can install the package via composer:
+- **Automated Fix Actions**: 
+  - One-click injection of default seed data.
+  - One-click processing of backed-up queues (`queue:work --stop-when-empty`).
+  - One-click queue retries (`queue:retry all`).
+  - One-click cache optimization.
 
-```bash
-composer require vjects/pulse
-```
+- **Zero-Impact Performance**: 
+  - Extremely lightweight architecture using Laravel Cache.
+  - Asynchronous lazy-loading of error logs.
+  - Background polling intervals strictly capped to avoid server load.
 
-Publish the assets and upgrade Filament:
+- **AI Log Analysis**: Deep integration with the VJECTS AI system to automatically analyze complex stack traces and suggest fixes.
 
-```bash
-php artisan filament:upgrade
-```
+## 📂 Architecture & Storage
 
-## 🧠 AI Assistant Setup
+To prevent infinite loops during database failures, V-Pulse **does not rely on MySQL** for its core settings. 
+Instead, it uses a localized, flat-file architecture located in `storage/app/`:
+- `vpulse.json` - Core settings, language preferences, and module flags.
+- `vpulse_ai.json` - AI analysis history and states.
 
-To enable the AI Assistant:
-1. Navigate to the **V-Pulse System Diagnostics** page in your Filament admin panel.
-2. Go to the **AI Assistant** tab.
-3. Select your provider (Qwen, OpenAI, or Google).
-4. Enter the model name (e.g., `qwen3.6-flash`, `gpt-4o`, `gemini-1.5-pro`).
-5. Enter your API Key.
-6. Click the "AI Analysis" button on any failing module to receive a step-by-step fix in a popup modal.
+## 🛠️ Onboarding & Setup
 
-## 🌍 Multi-Language & Environment
+When installing V-Pulse on a new environment, the system strictly enforces an **Onboarding Wizard**. 
+1. The diagnostic features are locked by default.
+2. The admin must navigate to **Scope Settings** and select the environment, architecture, and language.
+3. Upon saving, V-Pulse unlocks the diagnostic sensors and begins polling.
 
-V-Pulse is fully localized. You can change the language directly in the **General Scope** settings tab. 
-If you set the **Environment Type** to `Local`, V-Pulse intelligently bypasses strict security and network checks to prevent false alarms during development.
+> **Warning for Developers**: Do NOT manually alter `vpulse.json` unless absolutely necessary. Rely on the Filament dashboard for configuration.
 
-### 💡 Local Development Quirks (ارورهای طبیعی در لوکال)
+## 📋 Common Expected Errors (Local Environment)
 
-When testing V-Pulse locally using PHP's built-in server (`php artisan serve`), you might encounter certain expected errors:
-
-- **API Connection Timeout (cURL Error 28):** PHP's built-in server is single-threaded. When the dashboard loads, it cannot simultaneously respond to an API ping request to itself (`localhost:8000/api/health`). This causes a cURL timeout. This is completely normal and proves your network code works! **If Environment is set to Local, V-Pulse will automatically ignore this error and turn the sensor green.**
-- **Security Check Failures:** In local development, `APP_DEBUG` is usually true. V-Pulse will detect this as a vulnerability in Production, but will safely ignore it in Local mode.
-
-*(در صورتی که نوع محیط را روی `Local` قرار دهید، تمامی این خطاهای طبیعی نادیده گرفته می‌شوند تا باعث مزاحمت در هنگام کدنویسی نشوند.)*
-
-## 📊 Live System Logs
-
-Every failed diagnostic check is recorded in a dedicated `vpulse.log` file. You can view these logs directly in the **System Logs** tab on the dashboard, completely translated into your selected interface language.
+V-Pulse is highly aggressive in production but understands local development constraints. When `system_environment` is set to `local`, the following errors are **expected and ignored**:
+- **API Network Timeout (cURL 28)**: Standard `php artisan serve` cannot ping itself asynchronously. This is normal.
+- **APP_DEBUG Alert**: Having Debug mode ON is completely expected in local environments.
+- **Slow Cache Driver**: Local setups using `file` cache will not trigger critical warnings.
 
 ---
-Engineered by VJECTS Digital Reality.
+*Built with ❤️ for the VJECTS Ecosystem.*

@@ -92,6 +92,19 @@ abstract class BaseChecker implements CheckerInterface
                 'mail_desc' => 'Checks if the application can establish a socket connection with the SMTP server.',
                 'mail_ok' => 'Successfully connected to the SMTP server.',
                 'mail_fail' => 'SMTP Connection Failed: :error',
+                
+                'cache_name' => 'Caching System Health',
+                'cache_desc' => 'Verifies cache read/write operations and checks driver performance.',
+                'cache_ok' => 'Cache is fully operational using the [:driver] driver.',
+                'cache_warn' => 'Warning: Using the [:driver] cache driver in production. This causes performance bottlenecks.',
+                'cache_fail' => 'Cache test failed: :error',
+                'cache_fix' => 'Optimize & Clear Cache',
+                
+                'redis_name' => 'Redis Memory Database',
+                'redis_desc' => 'Checks connection to the Redis server for blazing fast operations.',
+                'redis_ok' => 'Successfully pinged the Redis server.',
+                'redis_fail' => 'Redis Connection Failed: :error',
+                'redis_disabled' => 'Redis is not configured (Driver: :driver). Ignored.',
             ],
             'fa' => [
                 'db_name' => 'سلامت دیتابیس مرکزی',
@@ -135,6 +148,19 @@ abstract class BaseChecker implements CheckerInterface
                 'mail_desc' => 'بررسی اتصال سوکت به سرور ارسال ایمیل (SMTP) برای اطمینان از سلامت سرویس ایمیل.',
                 'mail_ok' => 'ارتباط با سرور ایمیل با موفقیت برقرار شد.',
                 'mail_fail' => 'خطا در ارتباط با سرور ایمیل: :error',
+                
+                'cache_name' => 'سلامت سیستم کَش (Cache)',
+                'cache_desc' => 'بررسی عملیات خواندن/نوشتن کش و تحلیل کارایی درایور مورد استفاده.',
+                'cache_ok' => 'سیستم کش با موفقیت و از طریق درایور [:driver] در حال کار است.',
+                'cache_warn' => 'هشدار: شما از درایور کُند [:driver] در محیط پروداکشن استفاده می‌کنید که باعث افت پرفورمنس می‌شود.',
+                'cache_fail' => 'خطا در عملیات کش: :error',
+                'cache_fix' => 'پاکسازی و بهینه‌سازی کش',
+                
+                'redis_name' => 'دیتابیس فوق‌سریع Redis',
+                'redis_desc' => 'بررسی اتصال به سرور Redis برای پردازش‌های فوق‌سریع.',
+                'redis_ok' => 'اتصال به سرور Redis با موفقیت برقرار شد.',
+                'redis_fail' => 'خطا در اتصال به Redis: :error',
+                'redis_disabled' => 'ردیس کانفیگ نشده است (درایور فعلی: :driver). نادیده گرفته شد.',
             ]
         ];
 

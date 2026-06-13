@@ -27,6 +27,7 @@ class VPulseDashboard extends Page implements HasForms
     public ?string $aiResponse = null;
     public ?string $aiAnalysisTitle = null;
     public ?string $lastChecked = null;
+    public ?string $loadedLogs = null;
 
     public function mount(): void
     {
@@ -353,6 +354,11 @@ class VPulseDashboard extends Page implements HasForms
         return $manager->runChecks();
     }
     
+    public function loadLogs(): void
+    {
+        $this->loadedLogs = $this->getLogs();
+    }
+
     public function getLogs(): string
     {
         $logPath = storage_path('logs/vpulse.log');
@@ -378,6 +384,8 @@ class VPulseDashboard extends Page implements HasForms
         if (file_exists($logPath)) {
             unlink($logPath);
         }
+        
+        $this->loadedLogs = '';
         
         $isFa = ($this->data['system_language'] ?? 'fa') === 'fa';
         \Filament\Notifications\Notification::make()

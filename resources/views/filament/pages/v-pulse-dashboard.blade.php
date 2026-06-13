@@ -41,7 +41,7 @@
 
                     <x-filament::tabs.item 
                         alpine-active="activeTab === 'logs'" 
-                        x-on:click="activeTab = 'logs'"
+                        x-on:click="activeTab = 'logs'; $wire.loadLogs()"
                     >
                         {{ $isFa ? 'لاگ سیستم' : 'System Logs' }}
                     </x-filament::tabs.item>
@@ -61,7 +61,7 @@
                             @endphp
                             
                             @if($hasUnread)
-                                <span class="flex h-3 w-3 absolute -top-1 -right-4" wire:poll.10s>
+                                <span class="flex h-3 w-3 absolute -top-1 -right-4" wire:poll.60s>
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-info-400 opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-3 w-3 bg-info-500"></span>
                                 </span>
@@ -196,7 +196,7 @@
                                 {{ $isFa ? 'پاک کردن لاگ‌ها' : 'Clear Logs' }}
                             </x-filament::button>
                         </div>
-                        <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm" dir="ltr" style="max-height: 400px; overflow-y: auto;">{{ $this->getLogs() }}</pre>
+                        <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm" dir="ltr" style="max-height: 400px; overflow-y: auto;">{{ $loadedLogs ?? 'Loading logs...' }}</pre>
                     </x-filament::section>
                 </div>
                 

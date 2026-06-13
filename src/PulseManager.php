@@ -118,6 +118,8 @@ class PulseManager
             Checkers\DatabaseChecker::class,
             Checkers\QueueChecker::class,
             Checkers\MailChecker::class,
+            Checkers\CacheChecker::class,
+            Checkers\RedisChecker::class,
             Checkers\ApiConnectionChecker::class,
             Checkers\SecurityChecker::class,
             Checkers\TelegramConnectionChecker::class,
