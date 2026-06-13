@@ -15,9 +15,13 @@ class PulsePlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([
-            VPulseDashboard::class,
-        ]);
+        $panel
+            ->pages([
+                \Vjects\Pulse\Filament\Pages\VPulseDashboard::class,
+            ])
+            ->widgets([
+                \Vjects\Pulse\Filament\Widgets\VPulseWidget::class,
+            ]);
     }
 
     public function boot(Panel $panel): void
