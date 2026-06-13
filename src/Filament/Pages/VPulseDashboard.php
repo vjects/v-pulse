@@ -34,6 +34,12 @@ class VPulseDashboard extends Page implements HasForms
         $manager = app('vjects-pulse');
         $this->form->fill($manager->getSettings());
     }
+    
+    public function isConfigured(): bool
+    {
+        return app('vjects-pulse')->isConfigured();
+    }
+
     public function form(Form $form): Form
     {
         /** @var PulseManager $manager */
@@ -273,6 +279,35 @@ class VPulseDashboard extends Page implements HasForms
                 ->danger()
                 ->send();
         }
+    }
+    
+    public function performFixAction(): Action
+    {
+        /** @var PulseManager $manager */
+        $manager = app('vjects-pulse');
+        $isFa = ($manager->getSettings()['system_language'] ?? 'fa') === 'fa';
+        
+        return Action::make('performFixAction')
+            ->requiresConfirmation()
+            ->modalHeading($isFa ? 'تأیید عملیات (Seed / Fix)' : 'Confirm Operation')
+            ->modalDescription($isFa ? 'آیا از اجرای این عملیات اطمینان دارید؟ اطلاعات پیش‌فرض به سیستم تزریق خواهند شد.' : 'Are you sure you want to run this? Default data will be injected.')
+            ->modalSubmitActionLabel($isFa ? 'بله، اجرا کن' : 'Yes, Run it')
+            ->action(function (array $arguments) {
+                $checkerClass = $arguments['checker'];
+                $checker = app($checkerClass);
+                if (method_exists($checker, 'performFix')) {
+                    $checker->performFix();
+                }
+                
+                \Illuminate\Support\Facades\Cache::forget('vpulse_check_results_data');
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('عملیات با موفقیت انجام شد / Operation successful')
+                    ->success()
+                    ->send();
+                    
+                $this->redirect(request()->header('Referer'));
+            });
     }
 
     public function performRescan(): void

@@ -55,6 +55,8 @@ abstract class BaseChecker implements CheckerInterface
                 'db_desc' => 'Checks if the main database is connected and core tables exist.',
                 'db_ok' => 'Database connected and migrations exist.',
                 'db_fail' => 'Database connection failed: :error',
+                'db_missing_seed' => 'Database connected, but missing essential baseline data: :tables',
+                'db_missing_seed_action' => 'Inject Default Data (Seed)',
                 'db_local_note' => ' (Local environment allows slower connections)',
                 
                 'api_name' => 'API Ecosystem Connection',
@@ -83,6 +85,8 @@ abstract class BaseChecker implements CheckerInterface
                 'db_desc' => 'بررسی اتصال دیتابیس و وجود جداول اصلی (مایگریشن‌ها).',
                 'db_ok' => 'دیتابیس متصل است و مایگریشن‌ها وجود دارند.',
                 'db_fail' => 'خطا در اتصال به دیتابیس: :error',
+                'db_missing_seed' => 'دیتابیس متصل است، اما جداول از اطلاعات پایه خالی هستند (نیاز به Seed): :tables',
+                'db_missing_seed_action' => 'تزریق اطلاعات پیش‌فرض (Seed)',
                 'db_local_note' => ' (در محیط لوکال تاخیر در اتصال طبیعی است)',
                 
                 'api_name' => 'اتصال اکوسیستم API',

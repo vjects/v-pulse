@@ -20,47 +20,82 @@
         </div>
 
         <!-- Diagnostics Panel -->
-        <div class="lg:col-span-2 space-y-6" x-data="{ activeTab: 'checks' }">
-            <x-filament::tabs>
-                <x-filament::tabs.item 
-                    alpine-active="activeTab === 'checks'" 
-                    x-on:click="activeTab = 'checks'"
+        <div class="lg:col-span-2 space-y-6" x-data="{ activeTab: '{{ $this->isConfigured() ? 'checks' : 'settings' }}' }">
+            <x-filament::tabs class="mb-6">
+                <x-filament::tabs.item
+                    x-on:click="activeTab = 'settings'"
+                    x-bind:class="{ 'bg-white text-primary-600 shadow-sm dark:bg-gray-800 dark:text-primary-400': activeTab === 'settings' }"
+                    class="font-medium px-4 py-2"
                 >
-                    {{ $isFa ? 'وضعیت سیستم' : 'System Status' }}
+                    {{ $isFa ? 'تنظیمات (Scope)' : 'Scope Settings' }}
                 </x-filament::tabs.item>
                 
-                <x-filament::tabs.item 
-                    alpine-active="activeTab === 'logs'" 
-                    x-on:click="activeTab = 'logs'"
-                >
-                    {{ $isFa ? 'لاگ سیستم' : 'System Logs' }}
-                </x-filament::tabs.item>
-                
-                <x-filament::tabs.item 
-                    alpine-active="activeTab === 'ai_history'" 
-                    x-on:click="activeTab = 'ai_history'"
-                >
-                    <div class="flex items-center gap-2 relative">
-                        {{ $isFa ? 'تاریخچه هوش مصنوعی' : 'AI History' }}
-                        
-                        @php
-                            /** @var \Vjects\Pulse\PulseManager $manager */
-                            $manager = app('vjects-pulse');
-                            $histories = $manager->getAiHistory();
-                            $hasUnread = collect($histories)->where('is_read', false)->count() > 0;
-                        @endphp
-                        
-                        @if($hasUnread)
-                            <span class="flex h-3 w-3 absolute -top-1 -right-4" wire:poll.10s>
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-info-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-3 w-3 bg-info-500"></span>
-                            </span>
-                        @endif
-                    </div>
-                </x-filament::tabs.item>
+                @if($this->isConfigured())
+                    <x-filament::tabs.item
+                        x-on:click="activeTab = 'checks'"
+                        x-bind:class="{ 'bg-white text-primary-600 shadow-sm dark:bg-gray-800 dark:text-primary-400': activeTab === 'checks' }"
+                        class="font-medium px-4 py-2"
+                    >
+                        {{ $isFa ? 'وضعیت سیستم' : 'System Status' }}
+                    </x-filament::tabs.item>
+
+                    <x-filament::tabs.item 
+                        alpine-active="activeTab === 'logs'" 
+                        x-on:click="activeTab = 'logs'"
+                    >
+                        {{ $isFa ? 'لاگ سیستم' : 'System Logs' }}
+                    </x-filament::tabs.item>
+                    
+                    <x-filament::tabs.item 
+                        alpine-active="activeTab === 'ai_history'" 
+                        x-on:click="activeTab = 'ai_history'"
+                    >
+                        <div class="flex items-center gap-2 relative">
+                            {{ $isFa ? 'تاریخچه هوش مصنوعی' : 'AI History' }}
+                            
+                            @php
+                                /** @var \Vjects\Pulse\PulseManager $manager */
+                                $manager = app('vjects-pulse');
+                                $histories = $manager->getAiHistory();
+                                $hasUnread = collect($histories)->where('is_read', false)->count() > 0;
+                            @endphp
+                            
+                            @if($hasUnread)
+                                <span class="flex h-3 w-3 absolute -top-1 -right-4" wire:poll.10s>
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-info-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-info-500"></span>
+                                </span>
+                            @endif
+                        </div>
+                    </x-filament::tabs.item>
+                @endif
             </x-filament::tabs>
 
             <div class="mt-6">
+                <!-- Settings Tab -->
+                <div x-show="activeTab === 'settings'">
+                    
+                    @if(!$this->isConfigured())
+                        <div class="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg relative overflow-hidden">
+                            <div class="absolute right-0 top-0 opacity-10">
+                                <x-filament::icon icon="heroicon-o-sparkles" class="w-32 h-32 transform translate-x-8 -translate-y-8" />
+                            </div>
+                            <div class="relative z-10">
+                                <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+                                    <x-filament::icon icon="heroicon-o-rocket-launch" class="w-6 h-6" />
+                                    {{ $isFa ? 'به سیستم تشخیص هوشمند V-Pulse خوش آمدید!' : 'Welcome to V-Pulse Smart Diagnostics!' }}
+                                </h2>
+                                <p class="opacity-90 max-w-2xl text-sm leading-relaxed">
+                                    {{ $isFa ? 'برای راه‌اندازی و فعال‌سازی این سیستم، ابتدا باید تنظیمات پایه (مثل زبان سیستم، معماری محیط اجرا و ماژول‌ها) را از فرم زیر پیکربندی کرده و دکمه "ذخیره تنظیمات" در بالا را کلیک کنید تا سایر بخش‌ها فعال شوند.' : 'To initialize the system, please configure the basic settings below (e.g., system language, architecture mode) and click "Save Settings" at the top to unlock the diagnostic modules.' }}
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+                    <form wire:submit="saveSettings">
+                        {{ $this->form }}
+                    </form>
+                </div>
+
                 <!-- Checks Tab -->
                 <div x-show="activeTab === 'checks'" class="space-y-6">
                     @php
@@ -104,7 +139,7 @@
                                         @if($result['action'])
                                             <x-filament::button 
                                                 color="warning" 
-                                                wire:click="fixAction('{{ addslashes(get_class($result['instance'])) }}')"
+                                                wire:click="mountAction('performFixAction', { checker: '{{ addslashes(get_class($result['instance'])) }}' })"
                                             >
                                                 {{ $result['action'] }}
                                             </x-filament::button>

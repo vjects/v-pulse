@@ -9,6 +9,14 @@ class PulseManager
     protected array $checkers = [];
 
     /**
+     * Check if V-Pulse has been configured at least once.
+     */
+    public function isConfigured(): bool
+    {
+        return file_exists(storage_path('app/vpulse.json'));
+    }
+
+    /**
      * Get settings from isolated JSON file.
      */
     public function getSettings(): array
