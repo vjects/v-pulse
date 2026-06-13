@@ -40,7 +40,23 @@
                     alpine-active="activeTab === 'ai_history'" 
                     x-on:click="activeTab = 'ai_history'"
                 >
-                    {{ $isFa ? 'تاریخچه تحلیل‌های هوش مصنوعی' : 'AI Analysis History' }}
+                    <div class="flex items-center gap-2 relative">
+                        {{ $isFa ? 'تاریخچه هوش مصنوعی' : 'AI History' }}
+                        
+                        @php
+                            /** @var \Vjects\Pulse\PulseManager $manager */
+                            $manager = app('vjects-pulse');
+                            $histories = $manager->getAiHistory();
+                            $hasUnread = collect($histories)->where('is_read', false)->count() > 0;
+                        @endphp
+                        
+                        @if($hasUnread)
+                            <span class="flex h-3 w-3 absolute -top-1 -right-4" wire:poll.10s>
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-info-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-info-500"></span>
+                            </span>
+                        @endif
+                    </div>
                 </x-filament::tabs.item>
             </x-filament::tabs>
 
@@ -91,6 +107,7 @@
                                             <x-filament::button 
                                                 color="info" 
                                                 icon="heroicon-o-sparkles"
+                                                x-on:click="activeTab = 'ai_history'"
                                                 wire:click="analyzeWithAi('{{ addslashes(get_class($result['instance'])) }}')"
                                             >
                                                 {{ $isFa ? 'تحلیل با هوش مصنوعی' : 'AI Analysis' }}
@@ -117,24 +134,40 @@
                 </div>
                 
                 <!-- AI History Tab -->
-                <div x-show="activeTab === 'ai_history'" x-cloak class="space-y-6">
-                    @php
-                        /** @var \Vjects\Pulse\PulseManager $manager */
-                        $manager = app('vjects-pulse');
-                        $histories = $manager->getAiHistory();
-                    @endphp
+                <div x-show="activeTab === 'ai_history'" x-cloak class="space-y-4">
+                    <div wire:loading wire:target="analyzeWithAi" class="w-full">
+                        <x-filament::section>
+                            <div class="flex items-center gap-3 text-info-500">
+                                <x-filament::loading-indicator class="h-6 w-6" />
+                                <span class="font-bold">{{ $isFa ? 'در حال برقراری ارتباط با هوش مصنوعی و تحلیل سیستم (لطفاً منتظر بمانید)...' : 'Communicating with AI and analyzing system (Please wait)...' }}</span>
+                            </div>
+                        </x-filament::section>
+                    </div>
                     
                     @forelse($histories as $history)
-                        <x-filament::section>
-                            <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                                <div class="flex items-center gap-2 text-primary-600">
-                                    <x-filament::icon icon="heroicon-o-sparkles" class="h-6 w-6" />
-                                    <h3 class="font-bold text-lg">{{ $history['checker'] ?? 'Unknown' }}</h3>
+                        <x-filament::section class="{{ !($history['is_read'] ?? false) ? 'ring-2 ring-info-500' : '' }}">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 rounded-lg {{ !($history['is_read'] ?? false) ? 'bg-info-500/10 text-info-500' : 'bg-gray-100 dark:bg-gray-800 text-gray-500' }}">
+                                        <x-filament::icon icon="heroicon-o-sparkles" class="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg flex items-center gap-2">
+                                            {{ $history['checker'] ?? 'Unknown' }}
+                                            @if(!($history['is_read'] ?? false))
+                                                <span class="inline-flex items-center rounded-md bg-info-50 px-2 py-1 text-xs font-medium text-info-700 ring-1 ring-inset ring-info-600/20 dark:bg-info-500/10 dark:text-info-400 dark:ring-info-500/20">جدید</span>
+                                            @endif
+                                        </h3>
+                                        <span class="text-sm text-gray-500 font-mono" dir="ltr">{{ $history['date'] ?? '' }}</span>
+                                    </div>
                                 </div>
-                                <span class="text-xs text-gray-500 font-mono">{{ $history['date'] ?? '' }}</span>
-                            </div>
-                            <div class="prose dark:prose-invert max-w-none text-sm" style="line-height: 1.8;" dir="rtl">
-                                {!! \Illuminate\Support\Str::markdown($history['response'] ?? '') !!}
+                                
+                                <x-filament::button 
+                                    color="gray" 
+                                    wire:click="viewAiHistory('{{ $history['id'] ?? '' }}')"
+                                >
+                                    {{ $isFa ? 'نمایش پاسخ' : 'View Response' }}
+                                </x-filament::button>
                             </div>
                         </x-filament::section>
                     @empty

@@ -343,9 +343,9 @@ class VPulseDashboard extends Page implements HasForms
             $sysLang = $lang === 'fa' ? 'Persian (فارسی)' : 'English';
             $envType = $settings['system_environment'] ?? 'production';
                 
-            $systemPrompt = "You are an elite DevOps Engineer and Software Architect. Your task is to diagnose and resolve system failures. You MUST respond entirely and fluently in {$sysLang}. Format the output with clear, well-organized Markdown structure. Avoid fluff and pleasantries; provide direct, highly technical, and actionable step-by-step resolution plans.";
+            $systemPrompt = "You are an elite DevOps Engineer. Diagnose and resolve system failures. You MUST respond entirely in {$sysLang}. Keep the response extremely short (maximum 100 words), bulleted, and highly technical. NO fluff.";
             
-            $userPrompt = "The following component has failed in our Laravel application.\n\nComponent Name: {$checkerName}\nDescription: {$checker->getDescription()}\nEnvironment: {$envType}\n\nPlease analyze this failure and provide the exact steps to fix it.";
+            $userPrompt = "Failed component: {$checkerName}\nDescription: {$checker->getDescription()}\nEnvironment: {$envType}\n\nProvide the exact steps to fix it. Response language: {$sysLang}";
             
             $url = '';
             $payload = [];
@@ -395,8 +395,6 @@ class VPulseDashboard extends Page implements HasForms
                     $this->aiResponse = $response->json('choices.0.message.content');
                 }
                 
-                $this->aiAnalysisTitle = "تحلیل هوشمند: {$checkerName}";
-                
                 // Save to history
                 $manager->saveAiAnalysis([
                     'checker' => $checkerName,
@@ -404,7 +402,11 @@ class VPulseDashboard extends Page implements HasForms
                     'response' => $this->aiResponse,
                 ]);
                 
-                $this->dispatch('open-modal', id: 'ai-analysis-modal');
+                \Filament\Notifications\Notification::make()
+                    ->title($lang === 'fa' ? 'تحلیل انجام شد' : 'Analysis Complete')
+                    ->body($lang === 'fa' ? 'لطفاً برای مشاهده نتیجه به تب تاریخچه مراجعه کنید.' : 'Please go to the AI History tab to view the result.')
+                    ->success()
+                    ->send();
             } else {
                 throw new \Exception($response->body());
             }
@@ -415,6 +417,27 @@ class VPulseDashboard extends Page implements HasForms
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
+        }
+    }
+    
+    public function viewAiHistory(string $id): void
+    {
+        /** @var PulseManager $manager */
+        $manager = app('vjects-pulse');
+        $histories = $manager->getAiHistory();
+        
+        foreach ($histories as $history) {
+            if (($history['id'] ?? '') === $id) {
+                $this->aiAnalysisTitle = "تحلیل هوشمند: {$history['checker']}";
+                $this->aiResponse = $history['response'];
+                
+                if (!($history['is_read'] ?? false)) {
+                    $manager->markAiHistoryAsRead($id);
+                }
+                
+                $this->dispatch('open-modal', id: 'ai-analysis-modal');
+                return;
+            }
         }
     }
 }

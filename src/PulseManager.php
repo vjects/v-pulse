@@ -54,10 +54,35 @@ class PulseManager
 
         $path = $dir . '/vpulse_ai.json';
         $history = $this->getAiHistory();
+        
+        $data['id'] = uniqid('ai_');
+        $data['is_read'] = false;
+        
         array_unshift($history, $data); // Add to top
         $history = array_slice($history, 0, 15); // Keep last 15 analyses
         
         file_put_contents($path, json_encode($history, JSON_PRETTY_PRINT));
+    }
+
+    public function markAiHistoryAsRead(string $id): void
+    {
+        $path = storage_path('app/vpulse_ai.json');
+        if (!file_exists($path)) return;
+        
+        $history = json_decode(file_get_contents($path), true) ?? [];
+        $modified = false;
+        
+        foreach ($history as &$item) {
+            if (($item['id'] ?? '') === $id) {
+                $item['is_read'] = true;
+                $modified = true;
+                break;
+            }
+        }
+        
+        if ($modified) {
+            file_put_contents($path, json_encode($history, JSON_PRETTY_PRINT));
+        }
     }
 
     /**
