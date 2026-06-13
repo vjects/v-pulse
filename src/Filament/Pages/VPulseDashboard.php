@@ -23,6 +23,8 @@ class VPulseDashboard extends Page implements HasForms
     protected static string $view = 'v-pulse::filament.pages.v-pulse-dashboard';
 
     public ?array $data = [];
+    public ?string $aiResponse = null;
+    public ?string $aiAnalysisTitle = null;
 
     public function mount(): void
     {
@@ -30,7 +32,6 @@ class VPulseDashboard extends Page implements HasForms
         $manager = app('vjects-pulse');
         $this->form->fill($manager->getSettings());
     }
-
     public function form(Form $form): Form
     {
         return $form
@@ -39,6 +40,15 @@ class VPulseDashboard extends Page implements HasForms
                     ->tabs([
                         \Filament\Forms\Components\Tabs\Tab::make('General Scope')
                             ->schema([
+                                Select::make('system_language')
+                                    ->label('System Interface Language')
+                                    ->options([
+                                        'fa' => 'فارسی (Persian)',
+                                        'en' => 'English',
+                                    ])
+                                    ->default('fa')
+                                    ->required(),
+                                    
                                 Select::make('mode')
                                     ->label('Architecture Mode')
                                     ->options([
@@ -89,6 +99,15 @@ class VPulseDashboard extends Page implements HasForms
                             
                         \Filament\Forms\Components\Tabs\Tab::make('AI Assistant')
                             ->schema([
+                                \Filament\Forms\Components\Select::make('ai_language')
+                                    ->label('AI Response Language')
+                                    ->options([
+                                        'fa' => 'فارسی (Persian)',
+                                        'en' => 'English',
+                                    ])
+                                    ->default('fa')
+                                    ->required(),
+                                    
                                 \Filament\Forms\Components\Select::make('ai_provider')
                                     ->label('LLM Provider')
                                     ->options([
@@ -176,16 +195,88 @@ class VPulseDashboard extends Page implements HasForms
 
     public function analyzeWithAi(string $checkerClass): void
     {
-        // Stub for LLM integration.
-        // In a full implementation, this will send the checker's failing status 
-        // to the selected LLM provider (Qwen, GPT, etc.) and return a suggestion.
+        /** @var PulseManager $manager */
+        $manager = app('vjects-pulse');
+        $settings = $manager->getSettings();
         
-        \Filament\Notifications\Notification::make()
-            ->title('AI Analysis Initiated')
-            ->body('Sending diagnostic data to the LLM agent...')
-            ->info()
-            ->send();
+        $provider = $settings['ai_provider'] ?? null;
+        $model = $settings['ai_model'] ?? null;
+        $apiKey = $settings['ai_api_key'] ?? null;
+        $lang = $settings['ai_language'] ?? 'fa';
+        
+        if (!$apiKey) {
+            \Filament\Notifications\Notification::make()
+                ->title('کلید API تنظیم نشده است')
+                ->body('لطفا ابتدا API Key را در تب دستیار هوش مصنوعی وارد کنید.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        try {
+            /** @var \Vjects\Pulse\Checkers\CheckerInterface $checker */
+            $checker = app($checkerClass);
+            $checkerName = $checker->getName();
+                
+            $prompt = "You are an expert DevOps engineer and software architect. Analyze this failing system component:\nComponent: {$checkerName}\nDescription: {$checker->getDescription()}\nPlease provide a short, highly technical, and actionable step-by-step fix in " . ($lang === 'fa' ? 'Persian' : 'English') . ". Format the output with clear Markdown structure, avoiding fluff.";
             
-        // ... AI Agent API call logic goes here ...
+            $url = '';
+            $payload = [];
+            
+            if ($provider === 'qwen') {
+                $url = 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions';
+                $payload = [
+                    'model' => $model ?: 'qwen-turbo',
+                    'messages' => [
+                        ['role' => 'user', 'content' => $prompt]
+                    ]
+                ];
+            } else if ($provider === 'openai') {
+                $url = 'https://api.openai.com/v1/chat/completions';
+                $payload = [
+                    'model' => $model ?: 'gpt-4o',
+                    'messages' => [
+                        ['role' => 'user', 'content' => $prompt]
+                    ]
+                ];
+            } else if ($provider === 'google') {
+                $url = "https://generativelanguage.googleapis.com/v1beta/models/" . ($model ?: 'gemini-1.5-pro') . ":generateContent?key=" . $apiKey;
+                $payload = [
+                    'contents' => [
+                        ['parts' => [['text' => $prompt]]]
+                    ]
+                ];
+            } else {
+                throw new \Exception("پروایدر هوش مصنوعی پشتیبانی نمی‌شود.");
+            }
+            
+            $request = \Illuminate\Support\Facades\Http::timeout(30);
+            
+            if ($provider !== 'google') {
+                $request = $request->withToken($apiKey);
+            }
+            
+            $response = $request->post($url, $payload);
+                
+            if ($response->successful()) {
+                if ($provider === 'google') {
+                    $this->aiResponse = $response->json('candidates.0.content.parts.0.text');
+                } else {
+                    $this->aiResponse = $response->json('choices.0.message.content');
+                }
+                
+                $this->aiAnalysisTitle = "تحلیل هوشمند: {$checkerName}";
+                $this->dispatch('open-modal', id: 'ai-analysis-modal');
+            } else {
+                throw new \Exception($response->body());
+            }
+            
+        } catch (\Exception $e) {
+            \Filament\Notifications\Notification::make()
+                ->title('خطا در تحلیل هوش مصنوعی')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 }

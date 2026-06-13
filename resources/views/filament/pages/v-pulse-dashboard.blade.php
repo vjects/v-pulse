@@ -76,4 +76,21 @@
         </div>
         
     </div>
+
+    <x-filament::modal id="ai-analysis-modal" width="3xl">
+        <x-slot name="heading">
+            {{ $aiAnalysisTitle ?? 'تحلیل هوش مصنوعی' }}
+        </x-slot>
+
+        <div class="prose dark:prose-invert max-w-none text-sm" style="line-height: 1.8;" dir="rtl">
+            {!! \Illuminate\Support\Str::markdown($aiResponse ?? 'در حال پردازش...') !!}
+        </div>
+        
+        <x-slot name="footer">
+            <x-filament::button color="gray" wire:click="$dispatch('close-modal', { id: 'ai-analysis-modal' })">
+                بستن
+            </x-filament::button>
+        </x-slot>
+    </x-filament::modal>
+
 </x-filament-panels::page>
