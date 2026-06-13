@@ -21,7 +21,7 @@ class EnsureVPulseIsConfigured
         if (!$pulseManager->isConfigured()) {
             
             // Allow access if they are already on the V-Pulse page or Livewire update routes
-            if ($request->routeIs('filament.admin.pages.v-pulse-dashboard') || $request->routeIs('livewire.update')) {
+            if ($request->routeIs('*v-pulse*') || $request->routeIs('*livewire*')) {
                 return $next($request);
             }
 
