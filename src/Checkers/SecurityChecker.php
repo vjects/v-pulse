@@ -58,8 +58,10 @@ class SecurityChecker extends BaseChecker
         return $this->tr('sec_fix');
     }
 
-    public function executeFix(): void
+    public function performFix(): void
     {
+        $this->run();
+        
         // Simple fix: touch the .env file to set APP_DEBUG=false
         // For a real package, modifying .env dynamically is risky, but we do it for demo
         $path = base_path('.env');
@@ -67,6 +69,8 @@ class SecurityChecker extends BaseChecker
             $content = file_get_contents($path);
             $content = preg_replace('/^APP_DEBUG=true/m', 'APP_DEBUG=false', $content);
             file_put_contents($path, $content);
+            
+            \Illuminate\Support\Facades\Artisan::call('config:clear');
         }
     }
 }

@@ -31,6 +31,8 @@ class CacheChecker extends BaseChecker
 
     public function performFix(): void
     {
+        $this->run();
+        
         if ($this->needsOptimization) {
             Artisan::call('optimize:clear');
             Artisan::call('optimize');

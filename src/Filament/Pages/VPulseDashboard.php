@@ -399,7 +399,9 @@ class VPulseDashboard extends Page implements HasForms
         try {
             /** @var \Vjects\Pulse\Checkers\CheckerInterface $checker */
             $checker = app($checkerClass);
-            $checker->executeFix();
+            if (method_exists($checker, 'performFix')) {
+                $checker->performFix();
+            }
             
             \Filament\Notifications\Notification::make()
                 ->title('Action Executed')

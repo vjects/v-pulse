@@ -39,6 +39,8 @@ class QueueChecker extends BaseChecker
 
     public function performFix(): void
     {
+        $this->run();
+        
         if ($this->hasFailedJobs) {
             Artisan::call('queue:retry', ['all' => true]);
         } elseif ($this->isBackedUp) {

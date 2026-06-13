@@ -21,6 +21,26 @@ class RedisChecker extends BaseChecker
         return true;
     }
 
+    public function getFixActionName(): ?string
+    {
+        return 'فعال‌سازی سیستم جایگزین (Fallback)';
+    }
+
+    public function performFix(): void
+    {
+        $path = base_path('.env');
+        if (file_exists($path)) {
+            $content = file_get_contents($path);
+            $content = preg_replace('/^CACHE_DRIVER=redis/m', 'CACHE_DRIVER=database', $content);
+            $content = preg_replace('/^QUEUE_CONNECTION=redis/m', 'QUEUE_CONNECTION=database', $content);
+            $content = preg_replace('/^SESSION_DRIVER=redis/m', 'SESSION_DRIVER=database', $content);
+            file_put_contents($path, $content);
+            
+            \Illuminate\Support\Facades\Artisan::call('config:clear');
+            \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        }
+    }
+
     public function run(): array
     {
         try {
