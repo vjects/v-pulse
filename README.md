@@ -135,8 +135,17 @@ app('vjects-pulse')->registerChecker(\App\Checkers\PaymentGatewayChecker::class)
 
 ---
 
+## 📜 Changelog / Recent Updates
+
+### v1.1.0 (Architecture Fixes)
+- **DatabaseChecker State Fix**: Resolved a critical logical bug where `$needsSeed` state was lost during fresh instance instantiation via Livewire's Action API, causing the `db:seed` fallback to silently fail. The checker now forces a re-run of its internal logic before applying fixes to ensure absolute consistency.
+- **Tailwind CSS Purge Immunity**: Refactored the pinging status dots (green/red indicators) to use explicit inline CSS (`style="background-color: ..."`) instead of Tailwind classes (`bg-success-500`). This completely prevents the host project's compiler from purging the styles, ensuring V-Pulse renders flawlessly regardless of the host's `tailwind.config.js`.
+
+---
+
 <p align="center">
   <strong>&copy; 2026 VJECTS Ecosystem. All rights reserved.</strong><br>
   <em>Designed exclusively for <a href="https://vjects.com">VJECTS.com</a> architectures.</em><br>
   Built with a Warrior Mindset.
 </p>
+

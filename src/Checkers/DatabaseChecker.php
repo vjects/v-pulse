@@ -30,6 +30,9 @@ class DatabaseChecker extends BaseChecker
 
     public function performFix(): void
     {
+        // Run checks first to populate state if needed, or just run seeders
+        $this->run();
+        
         if ($this->needsSeed) {
             if (class_exists(\Database\Seeders\PaymentMethodSeeder::class)) {
                 \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\PaymentMethodSeeder', '--force' => true]);

@@ -106,14 +106,14 @@
                             @foreach($results as $result)
                                 <div class="flex items-center gap-3 p-3 rounded-lg border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 shadow-sm transition-all hover:shadow-md">
                                     @if($result['status'] === 'success')
-                                        <span class="relative flex h-3 w-3">
-                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
-                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-success-500"></span>
+                                        <span class="relative flex h-3 w-3 shrink-0">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background-color: #22c55e;"></span>
+                                            <span class="relative inline-flex rounded-full h-3 w-3" style="background-color: #22c55e;"></span>
                                         </span>
                                     @else
-                                        <span class="relative flex h-3 w-3">
-                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger-400 opacity-75"></span>
-                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-danger-500"></span>
+                                        <span class="relative flex h-3 w-3 shrink-0">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background-color: #ef4444;"></span>
+                                            <span class="relative inline-flex rounded-full h-3 w-3" style="background-color: #ef4444;"></span>
                                         </span>
                                     @endif
                                     <span class="text-sm font-medium truncate">{{ $result['name'] }}</span>
@@ -141,7 +141,7 @@
                                     <div>
                                         <h3 class="font-bold text-lg">{{ $result['name'] }}</h3>
                                         <p class="text-sm text-gray-500">{{ $result['description'] }}</p>
-                                        <p class="text-sm font-mono mt-2 @if($result['status'] === 'success') text-success-600 @else text-danger-600 @endif">
+                                        <p class="text-sm font-mono mt-2" style="color: {{ $result['status'] === 'success' ? '#16a34a' : '#dc2626' }};">
                                             {{ $result['message'] }}
                                         </p>
                                     </div>
