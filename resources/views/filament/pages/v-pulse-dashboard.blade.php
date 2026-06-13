@@ -1,4 +1,5 @@
 <x-filament-panels::page>
+    <div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         @php
             $isFa = ($this->data['system_language'] ?? 'fa') === 'fa';
@@ -252,4 +253,5 @@
         </x-slot>
     </x-filament::modal>
 
+    </div>
 </x-filament-panels::page>
