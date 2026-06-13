@@ -184,6 +184,10 @@ class VPulseDashboard extends Page implements HasForms
      */
     protected function getHeaderActions(): array
     {
+        /** @var PulseManager $manager */
+        $manager = app('vjects-pulse');
+        $isFa = ($manager->getSettings()['system_language'] ?? 'fa') === 'fa';
+
         return [
             Action::make('testTelegram')
                 ->label($isFa ? 'تست ارسال به تلگرام' : 'Test Telegram')
