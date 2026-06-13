@@ -96,6 +96,10 @@ class VPulseDashboard extends Page implements HasForms
                                         'google' => 'Google Gemini',
                                         'qwen' => 'Qwen',
                                     ]),
+                                \Filament\Forms\Components\TextInput::make('ai_model')
+                                    ->label('AI Model Name')
+                                    ->placeholder('e.g. qwen3.6-flash, gpt-4o, gemini-1.5-pro')
+                                    ->helperText('مدل خاصی که دستیار باید استفاده کند را وارد کنید.'),
                                 \Filament\Forms\Components\TextInput::make('ai_api_key')
                                     ->label('API Key')
                                     ->password(),
