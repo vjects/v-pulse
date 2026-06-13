@@ -21,6 +21,9 @@ class PulsePlugin implements Plugin
             ])
             ->widgets([
                 \Vjects\Pulse\Filament\Widgets\VPulseWidget::class,
+            ])
+            ->authMiddleware([
+                \Vjects\Pulse\Http\Middleware\EnsureVPulseIsConfigured::class,
             ]);
     }
 

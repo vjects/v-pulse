@@ -31,7 +31,15 @@ class DatabaseChecker extends BaseChecker
     public function performFix(): void
     {
         if ($this->needsSeed) {
-            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+            if (class_exists(\Database\Seeders\PaymentMethodSeeder::class)) {
+                \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\PaymentMethodSeeder', '--force' => true]);
+            }
+            if (class_exists(\Database\Seeders\DefaultPageSeeder::class)) {
+                \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\DefaultPageSeeder', '--force' => true]);
+            }
+            if (class_exists(\Database\Seeders\StorageNodeSeeder::class)) {
+                \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\StorageNodeSeeder', '--force' => true]);
+            }
         }
     }
 
@@ -49,6 +57,9 @@ class DatabaseChecker extends BaseChecker
             }
             if (class_exists(\App\Models\DefaultPage::class) && \App\Models\DefaultPage::count() === 0) {
                 $missing[] = 'Default Pages';
+            }
+            if (class_exists(\App\Models\StorageNode::class) && \App\Models\StorageNode::count() === 0) {
+                $missing[] = 'Storage Nodes';
             }
             
             if (!empty($missing)) {

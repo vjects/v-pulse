@@ -38,10 +38,14 @@ Instead, it uses a localized, flat-file architecture located in `storage/app/`:
 
 ## 🛠️ Onboarding & Setup
 
-When installing V-Pulse on a new environment, the system strictly enforces an **Onboarding Wizard**. 
-1. The diagnostic features are locked by default.
-2. The admin must navigate to **Scope Settings** and select the environment, architecture, and language.
-3. Upon saving, V-Pulse unlocks the diagnostic sensors and begins polling.
+When installing V-Pulse on a new environment, the **Gatekeeper Middleware** is automatically injected into your Filament Admin Panel.
+
+1. **Automatic Gatekeeper:**
+   The `Vjects\Pulse\PulsePlugin` automatically intercepts any request to the admin panel and forcefully redirects the admin to V-Pulse if it hasn't been configured yet. No manual middleware installation is required!
+2. **Crash-Proof Your Widgets:**
+   Because V-Pulse operates on a raw environment initially, external databases (like `vjects_ai` or `vjects_ecosystem`) might be missing. You MUST wrap your custom Filament Dashboard Widget queries (e.g., `AiVokenPurchase::count()`) in a `try/catch` block. Otherwise, Filament will crash before the admin can even reach the V-Pulse Dashboard to fix the errors!
+3. **Configure the Scope:**
+   Once inside, the admin must navigate to **Scope Settings** and select the environment, architecture, and language. Upon saving, V-Pulse unlocks the diagnostic sensors.
 
 > **Warning for Developers**: Do NOT manually alter `vpulse.json` unless absolutely necessary. Rely on the Filament dashboard for configuration.
 
